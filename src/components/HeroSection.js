@@ -27,7 +27,7 @@ const HeroSection = () => {
                 lineHeight: 1.2
               }}
             >
-              ¿Cansado/a de perseguir padres por la colecta del profe?{' '}
+              ¿Cansado/a de perseguir padres por la colecta de un cumple?{' '}
               <Box component="span" className="text-gradient">
                 Hey Jack al rescate.
               </Box>

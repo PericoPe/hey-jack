@@ -13,13 +13,15 @@ import {
   Step,
   StepLabel,
   Alert,
-  Snackbar
+  Snackbar,
+  CircularProgress
 } from '@mui/material';
 import { Link, useNavigate, useParams, useLocation } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import GroupIcon from '@mui/icons-material/Group';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import EditIcon from '@mui/icons-material/Edit';
+import { joinCommunity, getCommunityDetails } from '../utils/api';
 
 const steps = ['Completar'];
 
@@ -31,6 +33,8 @@ const JoinCommunity = () => {
   const [communityCode, setCommunityCode] = useState('');
   const [joined, setJoined] = useState(false);
   const [communityDetails, setCommunityDetails] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [loadingDetails, setLoadingDetails] = useState(false);
   const [formData, setFormData] = useState({
     childName: '',
     childBirthdate: '',
@@ -52,27 +56,68 @@ const JoinCommunity = () => {
       const decodedId = decodeURIComponent(communityId);
       setCommunityCode(decodedId);
       
-      // Extraer las partes del ID (formato: INSTITUCION+SALAoGRADO+DIVISION+TIMESTAMP)
-      const parts = decodedId.split('+');
+      // Obtener detalles de la comunidad desde el backend
+      fetchCommunityDetails(decodedId);
       
-      if (parts.length >= 3) {
-        // Extraer y formatear los componentes del ID
-        const institution = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
-        const gradeLevel = parts[1].charAt(0).toUpperCase() + parts[1].slice(1);
-        const division = parts[2].charAt(0).toUpperCase() + parts[2].slice(1);
-        
-        // Configurar los detalles de la comunidad
-        setCommunityDetails({
-          name: `${institution} - ${gradeLevel} - ${division}`,
-          institution: institution,
-          gradeLevel: gradeLevel,
-          division: division,
-          contributionAmount: "1.500",
-          communityId: decodedId
-        });
-      }
+      // Mostrar directamente el formulario para unirse
+      setActiveStep(0);
     }
   }, [communityId, location.pathname]);
+  
+  // Función para obtener detalles de la comunidad desde el backend
+  const fetchCommunityDetails = async (communityId) => {
+    setLoadingDetails(true);
+    try {
+      console.log('Buscando comunidad con ID:', communityId);
+      
+      const response = await getCommunityDetails(communityId);
+      console.log('Respuesta de getCommunityDetails:', response);
+      
+      if (response.success && response.data) {
+        // Extraer las partes del ID (formato: INSTITUCION+SALAoGRADO+DIVISION+TIMESTAMP)
+        const parts = communityId.split('+');
+        
+        if (parts.length >= 3) {
+          // Extraer y formatear los componentes del ID
+          const institution = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+          const gradeLevel = parts[1].charAt(0).toUpperCase() + parts[1].slice(1);
+          const division = parts[2].charAt(0).toUpperCase() + parts[2].slice(1);
+          
+          // Configurar los detalles de la comunidad
+          const communityDetails = {
+            name: response.data.nombre_comunidad || `${institution} - ${gradeLevel} - ${division}`,
+            institution: institution,
+            gradeLevel: gradeLevel,
+            division: division,
+            contributionAmount: response.data.monto_individual || "1.500",
+            communityId: communityId,
+            status: response.data.estado || 'activa',
+            members: response.data.miembros || 1
+          };
+          
+          console.log('Comunidad encontrada:', communityDetails);
+          setCommunityDetails(communityDetails);
+        }
+      } else {
+        // Si no se encuentra la comunidad, mostrar un mensaje de error
+        console.error('No se encontró la comunidad:', communityId);
+        setSnackbar({
+          open: true,
+          message: response.message || 'No se encontró la comunidad',
+          severity: 'error'
+        });
+      }
+    } catch (error) {
+      console.error('Error al obtener detalles de la comunidad:', error);
+      setSnackbar({
+        open: true,
+        message: 'Error al conectar con el servidor: ' + (error.message || error),
+        severity: 'error'
+      });
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
 
   const handleCodeChange = (e) => {
     setCommunityCode(e.target.value);
@@ -94,19 +139,62 @@ const JoinCommunity = () => {
     }
   };
   
-  const handleNext = () => {
-    // Simulación de completar el proceso
-    setJoined(true);
-    setSnackbar({
-      open: true,
-      message: '¡Te has unido exitosamente a la comunidad!',
-      severity: 'success'
-    });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     
-    // Redireccionar al dashboard después de un breve retraso
-    setTimeout(() => {
-      navigate('/dashboard');
-    }, 1500);
+    if (!communityDetails || !communityDetails.communityId) {
+      setSnackbar({
+        open: true,
+        message: 'No se ha seleccionado una comunidad válida',
+        severity: 'error'
+      });
+      return;
+    }
+    
+    // Preparar datos para enviar al backend
+    const memberData = {
+      ...formData,
+      communityId: communityDetails.communityId
+    };
+    
+    setLoading(true);
+    try {
+      const response = await joinCommunity(memberData);
+      
+      if (response.success) {
+        setSnackbar({
+          open: true,
+          message: response.message || '¡Te has unido exitosamente a la comunidad!',
+          severity: 'success'
+        });
+        
+        // Redireccionar al dashboard después de un breve retraso
+        setTimeout(() => {
+          navigate('/dashboard', { 
+            state: { 
+              communityId: communityDetails.communityId,
+              isCreator: false,
+              communityData: communityDetails
+            } 
+          });
+        }, 1500);
+      } else {
+        setSnackbar({
+          open: true,
+          message: response.error || 'Error al unirse a la comunidad',
+          severity: 'error'
+        });
+      }
+    } catch (error) {
+      console.error('Error al unirse a la comunidad:', error);
+      setSnackbar({
+        open: true,
+        message: 'Error al conectar con el servidor',
+        severity: 'error'
+      });
+    } finally {
+      setLoading(false);
+    }
   };
   
   const handleBack = () => {
@@ -218,6 +306,22 @@ const JoinCommunity = () => {
             />
           </Grid>
         </Grid>
+        
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          fullWidth
+          size="large"
+          disabled={loading}
+          sx={{ py: 1.5, mt: 3 }}
+        >
+          {loading ? (
+            <CircularProgress size={24} color="inherit" />
+          ) : (
+            'Unirse a la comunidad'
+          )}
+        </Button>
       </Box>
     );
   };
@@ -333,7 +437,9 @@ const JoinCommunity = () => {
             borderRadius: 3
           }}
         >
-          {communityDetails ? (
+          {!communityId && !communityDetails ? (
+            renderSearchForm()
+          ) : (
             <>
               <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 5 }}>
                 {steps.map((label, index) => (
@@ -351,26 +457,18 @@ const JoinCommunity = () => {
                 {renderCommunityForm()}
               </Box>
               
-              <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
-                <Button
-                  color="inherit"
-                  onClick={handleBack}
-                  sx={{ mr: 1 }}
-                >
-                  Atrás
-                </Button>
-                <Box sx={{ flex: '1 1 auto' }} />
-                
+              <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2, justifyContent: 'center' }}>
                 <Button 
                   variant="contained"
-                  onClick={handleNext}
+                  color="primary"
+                  size="large"
+                  onClick={handleSubmit}
+                  sx={{ py: 1.5, px: 4, fontSize: '1.1rem' }}
                 >
-                  Siguiente
+                  Unirme a la comunidad
                 </Button>
               </Box>
             </>
-          ) : (
-            renderSearchForm()
           )}
         </Paper>
       </Container>

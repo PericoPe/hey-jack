@@ -59,23 +59,6 @@ const HeroSection = () => {
               >
                 Crear Comunidad
               </Button>
-              
-              <Button 
-                component={Link}
-                to="/unirse-comunidad"
-                variant="outlined" 
-                color="primary" 
-                size="large"
-                startIcon={<GroupAddIcon />}
-                sx={{ 
-                  py: 1.5,
-                  px: 3,
-                  fontSize: '1.1rem',
-                  width: { xs: '100%', sm: 'auto' }
-                }}
-              >
-                Unirse a Comunidad
-              </Button>
             </Box>
             
             <Typography 
@@ -84,15 +67,6 @@ const HeroSection = () => {
               sx={{ mt: 3, display: 'flex', alignItems: 'center', justifyContent: { xs: 'center', sm: 'flex-start' } }}
             >
               Ya ayudamos a +500 padres a organizar colectas sin estrés
-            </Typography>
-            
-            {/* Ejemplo de acceso directo a una comunidad */}
-            <Typography 
-              variant="body2" 
-              color="text.secondary"
-              sx={{ mt: 1, display: 'flex', alignItems: 'center', justifyContent: { xs: 'center', sm: 'flex-start' } }}
-            >
-              Ejemplo: <Link to="/unirse-comunidad/instituto+sala4+azul+123456" style={{ marginLeft: '8px', color: '#4e7df0' }}>instituto+sala4+azul+123456</Link>
             </Typography>
           </Grid>
           

@@ -3,34 +3,33 @@ import {
   Box, 
   Container, 
   Typography, 
-  Stepper, 
-  Step, 
-  StepLabel, 
   Button, 
   Paper,
   TextField,
   Grid,
-  FormControl,
-  InputLabel,
-  Select,
   MenuItem,
   InputAdornment,
+  Stepper,
+  Step,
+  StepLabel,
+  Divider,
   Snackbar,
-  Alert
+  Alert,
+  CircularProgress
 } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import CreateIcon from '@mui/icons-material/Create';
-import EditIcon from '@mui/icons-material/Edit';
-import ShareIcon from '@mui/icons-material/Share';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { createCommunity } from '../utils/api';
 
 const steps = ['Crear', 'Completar', 'Compartir'];
 
 const CreateCommunity = () => {
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
+  const [loading, setLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
@@ -50,7 +49,7 @@ const CreateCommunity = () => {
     communityId: ''
   });
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (activeStep === 0) {
       // Generar ID único para la comunidad en el primer paso
       const uniqueId = generateCommunityId();
@@ -58,10 +57,45 @@ const CreateCommunity = () => {
     }
     
     if (activeStep === steps.length - 1) {
-      // Aquí iría la lógica para guardar los datos y redirigir al dashboard
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 1500);
+      // Enviar datos al backend de Google Sheets
+      setLoading(true);
+      try {
+        const response = await createCommunity(formData);
+        
+        if (response.success) {
+          setSnackbar({
+            open: true,
+            message: response.message || '¡Comunidad creada exitosamente!',
+            severity: 'success'
+          });
+          
+          // Redirigir al dashboard después de un breve retraso
+          setTimeout(() => {
+            navigate('/dashboard', { 
+              state: { 
+                communityId: formData.communityId,
+                isCreator: true,
+                communityData: formData
+              } 
+            });
+          }, 1500);
+        } else {
+          setSnackbar({
+            open: true,
+            message: response.error || 'Error al crear la comunidad',
+            severity: 'error'
+          });
+        }
+      } catch (error) {
+        console.error('Error al crear comunidad:', error);
+        setSnackbar({
+          open: true,
+          message: 'Error al conectar con el servidor',
+          severity: 'error'
+        });
+      } finally {
+        setLoading(false);
+      }
     } else {
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
@@ -179,27 +213,27 @@ const CreateCommunity = () => {
               </Grid>
               
               <Grid item xs={12} sm={6}>
-                <FormControl fullWidth required>
-                  <InputLabel>¿Sala o Grado?</InputLabel>
-                  <Select
-                    name="gradeLevel"
-                    value={formData.gradeLevel}
-                    onChange={handleChange}
-                    label="¿Sala o Grado?"
-                  >
-                    <MenuItem value="Maternal">Maternal</MenuItem>
-                    <MenuItem value="Sala 3">Sala 3</MenuItem>
-                    <MenuItem value="Sala 4">Sala 4</MenuItem>
-                    <MenuItem value="Sala 5">Sala 5</MenuItem>
-                    <MenuItem value="1er. Grado">1er. Grado</MenuItem>
-                    <MenuItem value="2do. Grado">2do. Grado</MenuItem>
-                    <MenuItem value="3er. Grado">3er. Grado</MenuItem>
-                    <MenuItem value="4to. Grado">4to. Grado</MenuItem>
-                    <MenuItem value="5to. Grado">5to. Grado</MenuItem>
-                    <MenuItem value="6to. Grado">6to. Grado</MenuItem>
-                    <MenuItem value="7mo. Grado">7mo. Grado</MenuItem>
-                  </Select>
-                </FormControl>
+                <TextField
+                  required
+                  fullWidth
+                  label="¿Sala o Grado?"
+                  name="gradeLevel"
+                  value={formData.gradeLevel}
+                  onChange={handleChange}
+                  select
+                >
+                  <MenuItem value="Maternal">Maternal</MenuItem>
+                  <MenuItem value="Sala 3">Sala 3</MenuItem>
+                  <MenuItem value="Sala 4">Sala 4</MenuItem>
+                  <MenuItem value="Sala 5">Sala 5</MenuItem>
+                  <MenuItem value="1er. Grado">1er. Grado</MenuItem>
+                  <MenuItem value="2do. Grado">2do. Grado</MenuItem>
+                  <MenuItem value="3er. Grado">3er. Grado</MenuItem>
+                  <MenuItem value="4to. Grado">4to. Grado</MenuItem>
+                  <MenuItem value="5to. Grado">5to. Grado</MenuItem>
+                  <MenuItem value="6to. Grado">6to. Grado</MenuItem>
+                  <MenuItem value="7mo. Grado">7mo. Grado</MenuItem>
+                </TextField>
               </Grid>
               
               <Grid item xs={12} sm={6}>
@@ -433,26 +467,14 @@ const CreateCommunity = () => {
             borderRadius: 3
           }}
         >
-          <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 5 }}>
-            {steps.map((label, index) => {
-              const stepProps = {};
-              const labelProps = {};
-              
-              return (
-                <Step key={label} {...stepProps}>
-                  <StepLabel 
-                    {...labelProps}
-                    StepIconProps={{
-                      icon: index === 0 ? <CreateIcon /> : 
-                             index === 1 ? <EditIcon /> : 
-                             <ShareIcon />
-                    }}
-                  >
-                    {label}
-                  </StepLabel>
-                </Step>
-              );
-            })}
+          <Stepper activeStep={activeStep} alternativeLabel>
+            {steps.map((label) => (
+              <Step key={label}>
+                <StepLabel>
+                  {label}
+                </StepLabel>
+              </Step>
+            ))}
           </Stepper>
           
           <Box sx={{ mt: 2, mb: 4 }}>
@@ -470,11 +492,20 @@ const CreateCommunity = () => {
             </Button>
             <Box sx={{ flex: '1 1 auto' }} />
             
-            <Button 
+            <Button
               variant="contained"
+              color="primary"
+              fullWidth
+              size="large"
               onClick={handleNext}
+              disabled={loading}
+              sx={{ py: 1.5 }}
             >
-              {activeStep === steps.length - 1 ? 'Finalizar' : 'Siguiente'}
+              {loading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                activeStep === steps.length - 1 ? 'Finalizar' : 'Siguiente'
+              )}
             </Button>
           </Box>
         </Paper>

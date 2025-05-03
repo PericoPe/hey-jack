@@ -59,6 +59,23 @@ const HeroSection = () => {
               >
                 Crear Comunidad
               </Button>
+              
+              <Button 
+                component={Link}
+                to="/unirse-comunidad"
+                variant="outlined" 
+                color="primary" 
+                size="large"
+                startIcon={<GroupAddIcon />}
+                sx={{ 
+                  py: 1.5,
+                  px: 3,
+                  fontSize: '1.1rem',
+                  width: { xs: '100%', sm: 'auto' }
+                }}
+              >
+                Unirse a Comunidad
+              </Button>
             </Box>
             
             <Typography 

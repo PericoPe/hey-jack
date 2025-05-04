@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+const { createClient } = require('@supabase/supabase-js');
 
 // Estas credenciales son públicas y se pueden incluir en el código del cliente
 // Para un proyecto en producción, considera usar variables de entorno
@@ -8,4 +8,4 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 // Crear un cliente de Supabase
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-export default supabase;
+module.exports = supabase;

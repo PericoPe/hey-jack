@@ -434,10 +434,175 @@ const createBirthdayEvent = async (childName, birthdate, communityId) => {
   }
 };
 
-export default {
+/**
+ * Actualiza la tabla de eventos_activos basada en los próximos cumpleaños
+ * Busca cumpleaños que ocurrirán en los próximos 15 días y crea eventos activos para recaudar dinero
+ * @returns {Promise} - Promesa con la respuesta
+ */
+export const updateActiveEvents = async () => {
+  try {
+    // Obtener la fecha actual
+    const currentDate = new Date();
+    
+    // Calcular la fecha límite (15 días en el futuro)
+    const futureDate = new Date();
+    futureDate.setDate(currentDate.getDate() + 15);
+    
+    // Obtener todos los miembros
+    const { data: members, error: membersError } = await supabase
+      .from('miembros')
+      .select('*');
+    
+    if (membersError) throw membersError;
+    
+    // Procesar cada miembro para verificar si su cumpleaños está próximo
+    const activeEvents = [];
+    
+    for (const member of members) {
+      // Convertir la fecha de cumpleaños a objeto Date
+      let birthdateObj;
+      try {
+        // Si viene en formato YYYY-MM-DD
+        birthdateObj = new Date(member.cumple_hijo);
+      } catch (e) {
+        // Si hay error, intentar otro formato
+        const parts = member.cumple_hijo.split('/');
+        birthdateObj = new Date(parts[2], parts[1] - 1, parts[0]);
+      }
+      
+      // Crear la fecha del cumpleaños para este año
+      const currentYear = currentDate.getFullYear();
+      const birthdayThisYear = new Date(currentYear, birthdateObj.getMonth(), birthdateObj.getDate());
+      
+      // Si el cumpleaños ya pasó este año, verificar para el próximo año
+      if (birthdayThisYear < currentDate) {
+        birthdayThisYear.setFullYear(currentYear + 1);
+      }
+      
+      // Verificar si el cumpleaños está dentro del rango de 15 días
+      if (birthdayThisYear <= futureDate && birthdayThisYear >= currentDate) {
+        console.log(`Cumpleaños próximo encontrado: ${member.nombre_hijo} - ${birthdayThisYear.toISOString()}`);
+        
+        // Obtener los detalles de la comunidad
+        const { data: community, error: communityError } = await supabase
+          .from('comunidades')
+          .select('*')
+          .eq('id_comunidad', member.id_comunidad)
+          .single();
+        
+        if (communityError) throw communityError;
+        
+        // Obtener todos los miembros de la comunidad (excepto el cumpleañero)
+        const { data: communityMembers, error: communityMembersError } = await supabase
+          .from('miembros')
+          .select('*')
+          .eq('id_comunidad', member.id_comunidad)
+          .neq('nombre_hijo', member.nombre_hijo); // Excluir al cumpleañero
+        
+        if (communityMembersError) throw communityMembersError;
+        
+        // Calcular el objetivo de recaudación
+        const montoIndividual = parseFloat(community.monto_individual || 1500);
+        const objetivo = montoIndividual * communityMembers.length;
+        
+        // Verificar si ya existe un evento activo para este cumpleaños
+        const { data: existingEvent, error: existingEventError } = await supabase
+          .from('eventos_activos')
+          .select('*')
+          .eq('id_comunidad', member.id_comunidad)
+          .eq('nombre_hijo', member.nombre_hijo);
+        
+        if (existingEventError) throw existingEventError;
+        
+        // Si no existe un evento activo, crearlo
+        if (!existingEvent || existingEvent.length === 0) {
+          const eventId = `active_${member.id_comunidad}_${member.nombre_hijo.replace(/\s+/g, '')}_${Date.now()}`;
+          
+          // Crear el evento activo
+          const { data: eventData, error: eventError } = await supabase
+            .from('eventos_activos')
+            .insert([
+              {
+                id_evento: eventId,
+                id_comunidad: member.id_comunidad,
+                nombre_comunidad: community.nombre_comunidad,
+                nombre_hijo: member.nombre_hijo,
+                fecha_cumple: birthdayThisYear.toISOString(),
+                nombre_padre: member.nombre_padre, // Padre del cumpleañero (no aporta)
+                objetivo_recaudacion: objetivo,
+                recaudado: 0,
+                estado: 'activo',
+                fecha_creacion: new Date().toISOString(),
+                miembros_pendientes: communityMembers.map(m => ({
+                  nombre_padre: m.nombre_padre,
+                  whatsapp_padre: m.whatsapp_padre,
+                  monto_individual: montoIndividual,
+                  estado_pago: 'pendiente'
+                }))
+              }
+            ])
+            .select();
+          
+          if (eventError) throw eventError;
+          
+          if (eventData) {
+            console.log('Evento activo creado exitosamente:', eventData);
+            activeEvents.push(eventData[0]);
+          }
+        } else {
+          console.log('Ya existe un evento activo para este cumpleaños:', existingEvent);
+          activeEvents.push(existingEvent[0]);
+        }
+      }
+    }
+    
+    return {
+      success: true,
+      message: `Se encontraron ${activeEvents.length} eventos activos para los próximos 15 días`,
+      events: activeEvents
+    };
+  } catch (error) {
+    console.error('Error al actualizar eventos activos:', error);
+    return {
+      success: false,
+      message: 'Error al actualizar eventos activos: ' + error.message
+    };
+  }
+};
+
+/**
+ * Obtiene todos los eventos activos
+ * @returns {Promise} - Promesa con la respuesta
+ */
+export const getActiveEvents = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('eventos_activos')
+      .select('*')
+      .eq('estado', 'activo');
+    
+    if (error) throw error;
+    
+    return {
+      success: true,
+      data: data
+    };
+  } catch (error) {
+    console.error('Error al obtener eventos activos:', error);
+    return {
+      success: false,
+      message: 'Error al obtener eventos activos: ' + error.message
+    };
+  }
+};
+
+module.exports = {
   createCommunity,
   joinCommunity,
   getCommunityDetails,
+  updateActiveEvents,
+  getActiveEvents,
+  createBirthdayEvent,
   getCommunityMembers,
   updateCommunityStatus,
   updateIndividualAmount,

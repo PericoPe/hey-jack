@@ -38,6 +38,9 @@ const runScript = async (name) => {
       case 'migrateToContributorsTable':
         require('./migrate_to_contributors_table');
         break;
+      case 'checkMemberEmails':
+        require('./check_member_emails');
+        break;
       default:
         console.error(`❌ Error: Script "${name}" no encontrado`);
         console.log('Scripts disponibles:');
@@ -46,6 +49,7 @@ const runScript = async (name) => {
         console.log('  - sendEmailNotifications: Envía notificaciones por email para eventos activos');
         console.log('  - registerPayment: Registra pagos para eventos activos');
         console.log('  - migrateToContributorsTable: Migra datos a la tabla eventos_activos_aportantes');
+        console.log('  - checkMemberEmails: Verifica los emails de los miembros registrados');
         process.exit(1);
     }
   } catch (error) {

@@ -39,38 +39,119 @@ const sendBirthdayNotification = async (options) => {
     // Crear el asunto del email
     const subject = `Hey Jack está recaudando para el cumpleaños de ${childName}`;
 
-    // Crear el cuerpo del email
+    // Crear el cuerpo del email con un diseño más atractivo y profesional
     const html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
-        <div style="text-align: center; margin-bottom: 20px;">
-          <h1 style="color: #4e7df0;">Hey Jack</h1>
-          <p style="color: #666;">Tu asistente para colectas de cumpleaños</p>
-        </div>
-        
-        <div style="background-color: #f5f9ff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-          <h2 style="color: #4e7df0; margin-top: 0;">¡Hola ${parentName}!</h2>
-          <p>Te escribimos porque <strong>${childName}</strong> de la comunidad <strong>${communityName}</strong> cumplirá años el <strong>${formattedDate}</strong>.</p>
-          <p>Para celebrar este día especial, estamos organizando una colecta para su regalo.</p>
-        </div>
-        
-        <div style="background-color: #fff9e6; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ff9800;">
-          <h3 style="color: #ff9800; margin-top: 0;">Detalles de la colecta</h3>
-          <p><strong>Monto a aportar:</strong> $${amount}</p>
-          <p><strong>Fecha límite:</strong> ${formattedDate}</p>
-          <p><strong>Método de pago:</strong> Transferencia a Mercado Pago</p>
-          <p><strong>Alias:</strong> ${mpAlias}</p>
-        </div>
-        
-        <div style="margin-bottom: 20px;">
-          <p>Una vez realizado el pago, por favor responde a este email con el comprobante o envía un mensaje de WhatsApp al organizador para confirmar tu aporte.</p>
-          <p>¡Gracias por tu colaboración! Juntos haremos que este cumpleaños sea especial.</p>
-        </div>
-        
-        <div style="text-align: center; font-size: 12px; color: #999; margin-top: 30px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
-          <p>Este es un mensaje automático enviado por Hey Jack, tu asistente para colectas de cumpleaños.</p>
-          <p>Si tienes alguna pregunta, por favor contacta al organizador de la comunidad.</p>
-        </div>
-      </div>
+      <!DOCTYPE html>
+      <html lang="es">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Hey Jack - Cumpleaños de ${childName}</title>
+      </head>
+      <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5;">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+          <!-- HEADER -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #4e7df0, #8f57fb); padding: 30px 20px; text-align: center;">
+              <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">Hey Jack</h1>
+              <p style="color: #ffffff; opacity: 0.9; margin: 5px 0 0; font-size: 16px;">Tu asistente para colectas de cumpleaños</p>
+            </td>
+          </tr>
+          
+          <!-- SALUDO -->
+          <tr>
+            <td style="padding: 30px 30px 20px;">
+              <h2 style="color: #4e7df0; margin: 0 0 15px; font-size: 22px;">¡Hola ${parentName}! 👋</h2>
+              <p style="color: #333; font-size: 16px; line-height: 1.5; margin: 0 0 15px;">
+                Te escribimos porque <strong style="color: #4e7df0;">${childName}</strong> de la comunidad <strong>${communityName}</strong> cumplirá años el <strong>${formattedDate}</strong>.
+              </p>
+              <p style="color: #333; font-size: 16px; line-height: 1.5; margin: 0;">
+                Para celebrar este día especial, estamos organizando una colecta para su regalo. ¡Queremos hacer de este cumpleaños un momento inolvidable!
+              </p>
+            </td>
+          </tr>
+          
+          <!-- DETALLES DE LA COLECTA -->
+          <tr>
+            <td style="padding: 0 30px 30px;">
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f8f9ff; border-radius: 10px; overflow: hidden; border-left: 5px solid #4e7df0;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <h3 style="color: #4e7df0; margin: 0 0 15px; font-size: 18px;">📋 Detalles de la colecta</h3>
+                    
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <tr>
+                        <td width="50%" style="padding: 8px 0; color: #666; font-size: 15px;">Monto a aportar:</td>
+                        <td width="50%" style="padding: 8px 0; color: #333; font-size: 15px; font-weight: 600;">$${amount}</td>
+                      </tr>
+                      <tr>
+                        <td width="50%" style="padding: 8px 0; color: #666; font-size: 15px;">Fecha límite:</td>
+                        <td width="50%" style="padding: 8px 0; color: #333; font-size: 15px; font-weight: 600;">${formattedDate}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- INSTRUCCIONES DE PAGO -->
+          <tr>
+            <td style="padding: 0 30px 30px;">
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #fff9e6; border-radius: 10px; overflow: hidden; border-left: 5px solid #ff9800;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <h3 style="color: #ff9800; margin: 0 0 15px; font-size: 18px;">💰 Información de pago</h3>
+                    
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <tr>
+                        <td width="50%" style="padding: 8px 0; color: #666; font-size: 15px;">Método de pago:</td>
+                        <td width="50%" style="padding: 8px 0; color: #333; font-size: 15px; font-weight: 600;">Mercado Pago</td>
+                      </tr>
+                      <tr>
+                        <td width="50%" style="padding: 8px 0; color: #666; font-size: 15px;">Alias:</td>
+                        <td width="50%" style="padding: 8px 0; color: #333; font-size: 15px; font-weight: 600;">${mpAlias}</td>
+                      </tr>
+                    </table>
+                    
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ffcc80;">
+                      <p style="color: #333; font-size: 14px; line-height: 1.5; margin: 0;">
+                        <strong>Importante:</strong> Una vez realizado el pago, por favor responde a este email con el comprobante o envía un mensaje de WhatsApp al organizador para confirmar tu aporte.
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- MENSAJE FINAL -->
+          <tr>
+            <td style="padding: 0 30px 30px;">
+              <p style="color: #333; font-size: 16px; line-height: 1.5; margin: 0 0 15px;">
+                ¡Gracias por tu colaboración! Juntos haremos que este cumpleaños sea especial para ${childName}.
+              </p>
+              <p style="color: #333; font-size: 16px; line-height: 1.5; margin: 0;">
+                Saludos cordiales,<br>
+                <strong>Equipo Hey Jack</strong>
+              </p>
+            </td>
+          </tr>
+          
+          <!-- FOOTER -->
+          <tr>
+            <td style="background-color: #f5f5f5; padding: 20px; text-align: center; border-top: 1px solid #e0e0e0;">
+              <p style="color: #999; font-size: 13px; margin: 0 0 5px;">
+                Este es un mensaje automático enviado por Hey Jack, tu asistente para colectas de cumpleaños.
+              </p>
+              <p style="color: #999; font-size: 13px; margin: 0;">
+                Si tienes alguna pregunta, por favor contacta al organizador de la comunidad.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </body>
+      </html>
     `;
 
     // Configurar el email

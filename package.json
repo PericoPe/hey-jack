@@ -25,7 +25,9 @@
     "send-notifications": "node src/scripts/run.js sendEmailNotifications",
     "register-payment": "node src/scripts/run.js registerPayment",
     "migrate-contributors": "node src/scripts/run.js migrateToContributorsTable",
-    "check-emails": "node src/scripts/run.js checkMemberEmails"
+    "check-emails": "node src/scripts/run.js checkMemberEmails",
+    "test-email": "node src/scripts/run.js testEmail",
+    "create-contributors-table": "node src/scripts/run.js createContributorsTable"
   },
   "eslintConfig": {
     "extends": [

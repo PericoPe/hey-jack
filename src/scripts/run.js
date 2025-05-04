@@ -41,6 +41,12 @@ const runScript = async (name) => {
       case 'checkMemberEmails':
         require('./check_member_emails');
         break;
+      case 'testEmail':
+        require('./test_email');
+        break;
+      case 'createContributorsTable':
+        require('./create_contributors_table_api');
+        break;
       default:
         console.error(`❌ Error: Script "${name}" no encontrado`);
         console.log('Scripts disponibles:');
@@ -50,6 +56,8 @@ const runScript = async (name) => {
         console.log('  - registerPayment: Registra pagos para eventos activos');
         console.log('  - migrateToContributorsTable: Migra datos a la tabla eventos_activos_aportantes');
         console.log('  - checkMemberEmails: Verifica los emails de los miembros registrados');
+        console.log('  - testEmail: Envía un email de prueba para verificar la configuración SMTP');
+        console.log('  - createContributorsTable: Crea la tabla eventos_activos_aportantes usando la API');
         process.exit(1);
     }
   } catch (error) {

@@ -19,7 +19,7 @@ const testEmails = [
  */
 const main = async () => {
   console.log('=== AGREGAR APORTANTES DE PRUEBA ===');
-  console.log('Fecha actual:', new Date().toISOString());
+  console.log('Fecha actual:', new Date().toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' }));
   
   // Crear archivo de log
   const logFile = path.join(__dirname, '..', '..', 'contributors_log.txt');
@@ -30,7 +30,7 @@ const main = async () => {
   
   // Iniciar log
   fs.writeFileSync(logFile, `=== AGREGAR APORTANTES DE PRUEBA ===\n`);
-  fs.appendFileSync(logFile, `Fecha: ${new Date().toISOString()}\n\n`);
+  fs.appendFileSync(logFile, `Fecha: ${new Date().toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })}\n\n`);
   
   try {
     // Obtener eventos activos
@@ -137,7 +137,7 @@ const main = async () => {
             nombre_padre: nombre,
             email_padre: email,
             whatsapp_padre: '1234567890', // Número de WhatsApp ficticio
-            monto_individual: 1000, // Monto ficticio
+            monto_individual: 1500, // Monto correcto según la tabla miembros
             estado_pago: 'pendiente',
             notificacion_email: false,
             notificacion_whatsapp: false

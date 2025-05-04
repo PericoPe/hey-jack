@@ -24,11 +24,12 @@ const transporter = nodemailer.createTransport({
  * @returns {string} HTML del email
  */
 const generateEmailHTML = (data) => {
-  // Formatear la fecha del cumpleaños
+  // Formatear la fecha del cumpleaños con zona horaria de Argentina
   const formattedDate = new Date(data.birthdayDate).toLocaleDateString('es-AR', {
     day: 'numeric',
     month: 'long',
-    year: 'numeric'
+    year: 'numeric',
+    timeZone: 'America/Argentina/Buenos_Aires'
   });
   
   // Crear el HTML del email
@@ -179,6 +180,20 @@ const sendNotificationEmail = async (contributor, event, community) => {
       html
     });
     
+    // Guardar una copia del email en el archivo
+    const emailsFile = path.join(__dirname, '..', '..', 'emails_enviados.html');
+    fs.appendFileSync(emailsFile, `
+      <div style="border: 1px solid #ccc; margin: 20px 0; padding: 20px; border-radius: 5px;">
+        <h2>Email enviado a: ${contributor.email_padre}</h2>
+        <p><strong>Asunto:</strong> Hey Jack está recaudando para el cumpleaños de ${event.nombre_hijo}</p>
+        <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })}</p>
+        <div style="margin-top: 20px; padding: 20px; border: 1px dashed #eee;">
+          ${html}
+        </div>
+      </div>
+      <hr>
+    `);
+    
     return true;
   } catch (error) {
     console.error('Error al enviar email:', error);
@@ -191,7 +206,7 @@ const sendNotificationEmail = async (contributor, event, community) => {
  */
 const main = async () => {
   console.log('=== FORZAR ENVÍO DE NOTIFICACIONES ===');
-  console.log('Fecha actual:', new Date().toISOString());
+  console.log('Fecha actual:', new Date().toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' }));
   
   // Crear archivo de log
   const logFile = path.join(__dirname, '..', '..', 'force_notify_log.txt');
@@ -202,7 +217,11 @@ const main = async () => {
   
   // Iniciar log
   fs.writeFileSync(logFile, `=== FORZAR ENVÍO DE NOTIFICACIONES ===\n`);
-  fs.appendFileSync(logFile, `Fecha: ${new Date().toISOString()}\n\n`);
+  fs.appendFileSync(logFile, `Fecha: ${new Date().toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })}\n\n`);
+  
+  // Crear archivo para guardar los emails enviados
+  const emailsFile = path.join(__dirname, '..', '..', 'emails_enviados.html');
+  fs.writeFileSync(emailsFile, `<h1>Emails enviados - ${new Date().toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })}</h1>\n<hr>\n`);
   
   try {
     // Verificar conexión SMTP
@@ -245,12 +264,11 @@ const main = async () => {
         continue;
       }
       
-      // Obtener aportantes del evento
+      // Obtener TODOS los aportantes del evento, independientemente de su estado de notificación
       const { data: contributors, error: contributorsError } = await supabase
         .from('eventos_activos_aportantes')
         .select('*')
-        .eq('id_evento', event.id_evento || event.id)
-        .eq('estado_pago', 'pendiente');
+        .eq('id_evento', event.id_evento || event.id);
       
       if (contributorsError) {
         log(`Error al obtener aportantes: ${JSON.stringify(contributorsError)}`);
@@ -279,7 +297,7 @@ const main = async () => {
             .from('eventos_activos_aportantes')
             .update({
               notificacion_email: true,
-              fecha_notificacion_email: new Date().toISOString()
+              fecha_notificacion_email: new Date().toISOString() // Guardamos en formato ISO para la base de datos
             })
             .eq('id', contributor.id);
           
@@ -310,7 +328,7 @@ main()
     console.log('Script finalizado');
     process.exit(0);
   })
-  .catch(error => {
-    console.error('Error en el script:', error);
+  .catch((err) => {
+    console.error('❌ Error fatal en main:', err && err.stack ? err.stack : err);
     process.exit(1);
   });

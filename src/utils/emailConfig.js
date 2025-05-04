@@ -5,13 +5,13 @@
 const nodemailer = require('nodemailer');
 
 // Configuración del transportador de email
-// Para Gmail, es recomendable usar una "contraseña de aplicación" en lugar de la contraseña normal
-// https://support.google.com/accounts/answer/185833
+// NOTA: Esta configuración es solo para desarrollo y pruebas
+// En producción, se recomienda usar variables de entorno o un servicio de gestión de secretos
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'javierhursino@gmail.com', // Tu dirección de email
-    pass: process.env.EMAIL_PASSWORD || 'tu_contraseña_de_aplicación' // Usar variable de entorno por seguridad
+    user: 'javierhursino@gmail.com',
+    pass: '1982Roger' // IMPORTANTE: Esta contraseña debe ser reemplazada por una contraseña de aplicación en producción
   }
 });
 

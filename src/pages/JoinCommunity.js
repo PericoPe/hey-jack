@@ -121,7 +121,22 @@ const JoinCommunity = () => {
   };
 
   const handleCodeChange = (e) => {
-    setCommunityCode(e.target.value);
+    const inputValue = e.target.value;
+    
+    // Verificar si es un enlace completo
+    if (inputValue.includes('/unirse-comunidad/')) {
+      // Extraer el ID de la comunidad del enlace
+      const urlParts = inputValue.split('/unirse-comunidad/');
+      if (urlParts.length > 1) {
+        // Obtener la última parte del enlace (el ID de la comunidad)
+        const communityId = urlParts[1].split('?')[0]; // Eliminar parámetros de consulta si existen
+        setCommunityCode(communityId);
+        return;
+      }
+    }
+    
+    // Si no es un enlace, simplemente establecer el valor tal cual
+    setCommunityCode(inputValue);
   };
 
   const handleChange = (e) => {
@@ -356,6 +371,15 @@ const JoinCommunity = () => {
             </Typography>
           </Box>
         </Box>
+
+        <Paper elevation={1} sx={{ p: 3, mb: 4, bgcolor: '#f8f9fa', borderRadius: 2 }}>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            <b>¿Tienes un enlace de invitación?</b> Si alguien te ha compartido un enlace para unirte a una comunidad, puedes pegarlo directamente aquí.
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            El enlace debe tener un formato similar a: <i>https://heyjack.app/unirse-comunidad/escuela+sala3+roja+123456</i>
+          </Typography>
+        </Paper>
         
         <TextField
           fullWidth
@@ -363,7 +387,7 @@ const JoinCommunity = () => {
           variant="outlined"
           value={communityCode}
           onChange={handleCodeChange}
-          placeholder="Ej: instituto+sala3+roja+123456"
+          placeholder="Ej: instituto+sala3+roja+123456 o enlace completo"
           sx={{ mb: 3 }}
         />
         

@@ -33,6 +33,7 @@ const AdminEvents = lazy(() => import('../components/admin/AdminEvents'));
 const AdminActiveEvents = lazy(() => import('../components/admin/AdminActiveEvents'));
 const AdminNotifications = lazy(() => import('../components/admin/AdminNotifications'));
 const AdminSyncTools = lazy(() => import('../components/admin/AdminSyncTools'));
+const AdminNotificationTools = lazy(() => import('../components/admin/AdminNotificationTools'));
 const AdminDiagnostic = lazy(() => import('../components/admin/AdminDiagnostic'));
 
 // Componente TabPanel para mostrar el contenido de cada pestaña
@@ -344,7 +345,7 @@ const AdminPanel = () => {
                 </TabPanel>
                 
                 <TabPanel value={tabValue} index={5}>
-                  <AdminNotifications setNotification={setNotification} />
+                  <AdminNotificationTools setNotification={setNotification} />
                 </TabPanel>
                 
                 <TabPanel value={tabValue} index={6}>

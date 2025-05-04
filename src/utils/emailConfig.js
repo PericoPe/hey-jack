@@ -12,7 +12,8 @@ const transporter = nodemailer.createTransport({
   secure: true, // true para 465, false para otros puertos
   auth: {
     user: 'javierhursino@gmail.com',
-    pass: '1982Roger' // IMPORTANTE: Esta contraseña debe ser reemplazada por una contraseña de aplicación
+    // Contraseña de aplicación generada en la configuración de seguridad de Google
+    pass: process.env.EMAIL_PASSWORD || 'vrrh pefi imgf zfdb'
   },
   debug: true, // Mostrar información de depuración
   logger: true, // Registrar actividad en la consola
@@ -44,22 +45,40 @@ const testEmail = async () => {
   try {
     console.log('Enviando email de prueba...');
     
-    const info = await transporter.sendMail({
-      from: '"Hey Jack Test" <javierhursino@gmail.com>',
+    // Configurar opciones del email
+    const mailOptions = {
+      from: `"Hey Jack Test" <javierhursino@gmail.com>`,
       to: 'javierhursino@gmail.com',
-      subject: 'Test de conexión SMTP',
+      subject: 'Test de conexión SMTP - ' + new Date().toLocaleString(),
       text: 'Este es un email de prueba para verificar la conexión SMTP.',
-      html: '<b>Este es un email de prueba para verificar la conexión SMTP.</b>'
-    });
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+          <h2 style="color: #4e7df0;">Test de conexión SMTP</h2>
+          <p>Este es un email de prueba para verificar que la configuración SMTP está funcionando correctamente.</p>
+          <p>Fecha y hora: <strong>${new Date().toLocaleString()}</strong></p>
+          <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 20px 0;">
+          <p style="color: #666; font-size: 12px;">Este es un mensaje automático enviado por Hey Jack.</p>
+        </div>
+      `
+    };
     
-    console.log('Email de prueba enviado:');
+    // Enviar el email
+    const info = await transporter.sendMail(mailOptions);
+    
+    console.log('\n✅ Email de prueba enviado exitosamente:');
     console.log('- ID del mensaje:', info.messageId);
-    console.log('- URL de vista previa:', nodemailer.getTestMessageUrl(info));
+    console.log('- Enviado a:', info.envelope.to);
+    console.log('- Respuesta del servidor:', info.response);
     
     return { success: true, info };
   } catch (error) {
-    console.error('Error al enviar email de prueba:', error);
-    return { success: false, error };
+    console.error('\n❌ Error al enviar email de prueba:');
+    console.error('- Mensaje de error:', error.message);
+    console.error('- Código de error:', error.code);
+    console.error('- Comando:', error.command);
+    console.error('- Respuesta:', error.response);
+    
+    return { success: false, error: error.message };
   }
 };
 

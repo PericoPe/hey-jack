@@ -596,15 +596,7 @@ export const getActiveEvents = async () => {
   }
 };
 
-module.exports = {
-  createCommunity,
-  joinCommunity,
-  getCommunityDetails,
-  updateActiveEvents,
-  getActiveEvents,
-  createBirthdayEvent,
-  getCommunityMembers,
-  updateCommunityStatus,
-  updateIndividualAmount,
-  getUpcomingEvents
-};
+// Exportar la función createBirthdayEvent que antes era privada
+export { createBirthdayEvent };
+
+// Todas las demás funciones ya están exportadas con export const

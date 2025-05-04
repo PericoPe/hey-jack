@@ -12,11 +12,18 @@ const main = async () => {
   console.log('Fecha actual:', new Date().toISOString());
   
   try {
+    console.log('\nUsando configuración SMTP:');
+    console.log('- Servidor: smtp.gmail.com');
+    console.log('- Puerto: 465');
+    console.log('- Usuario: javierhursino@gmail.com');
+    console.log('- Contraseña: [OCULTA POR SEGURIDAD]');
+    
     // Enviar email de prueba
+    console.log('\nEnviando email de prueba...');
     const result = await testEmail();
     
     if (result.success) {
-      console.log('\n✅ Email de prueba enviado correctamente');
+      console.log('\n✅ EMAIL DE PRUEBA ENVIADO CORRECTAMENTE');
       console.log('ID del mensaje:', result.info.messageId);
       
       // Mostrar información adicional
@@ -29,8 +36,10 @@ const main = async () => {
       console.log('1. Los emails enviados programáticamente a veces no aparecen en la carpeta "Enviados" de Gmail');
       console.log('2. Verifica la carpeta "Recibidos" para ver si el email de prueba llegó (enviado a ti mismo)');
       console.log('3. Revisa también la carpeta "Spam" o "Correo no deseado"');
+      
+      console.log('\n✅ LA CONFIGURACIÓN DE EMAIL ESTÁ FUNCIONANDO CORRECTAMENTE');
     } else {
-      console.error('\n❌ Error al enviar email de prueba:', result.error);
+      console.error('\n❌ ERROR AL ENVIAR EMAIL DE PRUEBA:', result.error);
       
       // Mostrar posibles soluciones
       console.log('\nPosibles soluciones:');

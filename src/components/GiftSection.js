@@ -1,21 +1,19 @@
 import React from 'react';
 import { Box, Container, Grid, Typography, Button, Paper } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import { 
-  giftSectionImage as giftImage,
-  elmundoLogo,
-  cebraLogo,
-  carrouselLogo,
-  toyStoreLogo
-} from '../assets/index';
+import { giftSectionImage as giftImage } from '../assets/index';
 
 const GiftSection = () => {
   // Jugueterías argentinas como aliados comerciales
   const ecommercePartners = [
-    { name: 'El Mundo del Juguete', logo: elmundoLogo },
-    { name: 'Cebra Jugueterías', logo: cebraLogo },
-    { name: 'Carrousel Jugueterías', logo: carrouselLogo },
-    { name: 'Toy Store Argentina', logo: toyStoreLogo }
+    { name: 'El Mundo del Juguete', url: 'https://www.elmundodeljuguete.com.ar/' },
+    { name: 'Cebra Jugueterías', url: 'https://www.cebra.com.ar/' },
+    { name: 'City Kids', url: 'https://www.citykids.com.ar/' },
+    { name: 'Mono Coco', url: 'https://monococojugueterias.com/' },
+    { name: 'The Toy Store', url: 'https://www.thetoystore.com.ar/' },
+    { name: 'Kids Point', url: 'https://www.kidspoint.com.ar/' },
+    { name: 'Carrousel Jugueterías', url: 'https://jugueteriascarrousel.com.ar/' },
+    { name: 'Toy Store Argentina', url: 'https://www.toystore.com.ar/' }
   ];
 
   return (
@@ -78,35 +76,27 @@ const GiftSection = () => {
               <Grid container spacing={2} sx={{ mt: 1 }}>
                 {ecommercePartners.map((partner, index) => (
                   <Grid item xs={6} sm={3} key={index}>
-                    <Box 
-                      sx={{ 
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        height: 80,
-                        opacity: 0.8,
-                        transition: 'all 0.3s ease',
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      fullWidth
+                      href={partner.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      sx={{
+                        height: '60px',
+                        textTransform: 'none',
+                        fontWeight: 'bold',
+                        fontSize: '0.9rem',
+                        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
                         '&:hover': {
-                          opacity: 1,
-                          transform: 'scale(1.05)'
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 6px 12px rgba(0,0,0,0.15)'
                         }
                       }}
                     >
-                      <Box 
-                        component="img"
-                        src={partner.logo}
-                        alt={partner.name}
-                        sx={{ 
-                          maxHeight: 40, 
-                          maxWidth: '100%',
-                          mb: 1
-                        }}
-                      />
-                      <Typography variant="caption" fontWeight="bold" align="center">
-                        {partner.name}
-                      </Typography>
-                    </Box>
+                      {partner.name}
+                    </Button>
                   </Grid>
                 ))}
               </Grid>

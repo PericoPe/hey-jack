@@ -6,6 +6,7 @@ import LandingPage from './pages/LandingPage';
 import CreateCommunity from './pages/CreateCommunity';
 import JoinCommunity from './pages/JoinCommunity';
 import Dashboard from './pages/Dashboard';
+import LoginPage from './pages/LoginPage';
 
 // Create a custom theme for Hey Jack
 const theme = createTheme({
@@ -78,6 +79,7 @@ function App() {
           <Route path="/unirse-comunidad" element={<JoinCommunity />} />
           <Route path="/unirse-comunidad/:communityId" element={<JoinCommunity />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/login" element={<LoginPage />} />
         </Routes>
       </Router>
     </ThemeProvider>

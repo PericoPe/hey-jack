@@ -26,8 +26,22 @@ const runScript = async (name) => {
         const runUpdateActiveEvents = require('./updateActiveEvents');
         await runUpdateActiveEvents();
         break;
+      case 'registerAllBirthdays':
+        require('./registerAllBirthdays');
+        break;
+      case 'sendEmailNotifications':
+        require('./sendEmailNotifications');
+        break;
+      case 'registerPayment':
+        require('./registerPayment');
+        break;
       default:
         console.error(`❌ Error: Script "${name}" no encontrado`);
+        console.log('Scripts disponibles:');
+        console.log('  - updateActiveEvents: Actualiza la tabla de eventos activos');
+        console.log('  - registerAllBirthdays: Registra todos los cumpleaños en la tabla eventos');
+        console.log('  - sendEmailNotifications: Envía notificaciones por email para eventos activos');
+        console.log('  - registerPayment: Registra pagos para eventos activos');
         process.exit(1);
     }
   } catch (error) {

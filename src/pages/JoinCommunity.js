@@ -73,7 +73,8 @@ const JoinCommunity = () => {
       const response = await getCommunityDetails(communityId);
       console.log('Respuesta de getCommunityDetails:', response);
       
-      if (response.success && response.data) {
+      // Verificar si la respuesta es exitosa
+      if (response.success) {
         // Extraer las partes del ID (formato: INSTITUCION+SALAoGRADO+DIVISION+TIMESTAMP)
         const parts = communityId.split('+');
         
@@ -85,14 +86,14 @@ const JoinCommunity = () => {
           
           // Configurar los detalles de la comunidad
           const communityDetails = {
-            name: response.data.nombre_comunidad || `${institution} - ${gradeLevel} - ${division}`,
-            institution: institution,
-            gradeLevel: gradeLevel,
-            division: division,
-            contributionAmount: response.data.monto_individual || "1.500",
+            name: response.communityName || `${institution} - ${gradeLevel} - ${division}`,
+            institution: response.institution || institution,
+            gradeLevel: response.gradeLevel || gradeLevel,
+            division: response.division || division,
+            contributionAmount: response.contributionAmount || "1.500",
             communityId: communityId,
-            status: response.data.estado || 'activa',
-            members: response.data.miembros || 1
+            status: response.status || 'activa',
+            members: response.memberCount || 1
           };
           
           console.log('Comunidad encontrada:', communityDetails);
@@ -212,16 +213,30 @@ const JoinCommunity = () => {
     return (
       <Box>
         <Typography variant="h5" gutterBottom>
-          Completa tus datos
+          ¡Te han invitado a una comunidad!
         </Typography>
+        <Paper elevation={1} sx={{ p: 3, mb: 4, bgcolor: 'primary.light', color: 'primary.contrastText', borderRadius: 2 }}>
+          <Typography variant="body1" sx={{ fontWeight: 'medium', mb: 1 }}>
+            {communityDetails?.creatorName || 'Un organizador'} te está invitando a unirte a la comunidad
+          </Typography>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+            {communityDetails?.name || communityCode}
+          </Typography>
+          <Typography variant="body2">
+            Institución: <b>{communityDetails?.institution}</b><br />
+            Sala/Grado: <b>{communityDetails?.gradeLevel}</b><br />
+            División: <b>{communityDetails?.division}</b>
+          </Typography>
+        </Paper>
+        
         <Typography variant="body1" color="text.secondary" paragraph>
-          Para unirte a la comunidad {communityDetails?.name || communityCode}, necesitamos algunos datos.
+          Para unirte a esta comunidad, por favor completa los siguientes datos:
         </Typography>
         {communityId && (
           <Typography 
             variant="body2" 
             color="primary.main" 
-            sx={{ mb: 2, fontWeight: 'medium' }}
+            sx={{ mb: 2, fontWeight: 'medium', display: 'none' }}
           >
             URL de acceso: {window.location.origin}/unirse-comunidad/{communityId}
           </Typography>
@@ -457,7 +472,17 @@ const JoinCommunity = () => {
                 {renderCommunityForm()}
               </Box>
               
-              <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2, justifyContent: 'center' }}>
+              <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2, justifyContent: 'space-between' }}>
+                <Button 
+                  variant="outlined"
+                  color="secondary"
+                  size="large"
+                  onClick={() => navigate('/')}
+                  sx={{ py: 1.5, px: 3 }}
+                >
+                  Cancelar
+                </Button>
+                
                 <Button 
                   variant="contained"
                   color="primary"

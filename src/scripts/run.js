@@ -47,6 +47,18 @@ const runScript = async (name) => {
       case 'createContributorsTable':
         require('./create_contributors_table_api');
         break;
+      case 'sendNotifications':
+        require('./send_notifications');
+        break;
+      case 'addTestContributors':
+        require('./add_test_contributors');
+        break;
+      case 'previewEmailTemplate':
+        require('./preview_email_template');
+        break;
+      case 'forceNotify':
+        require('./force_notify');
+        break;
       default:
         console.error(`❌ Error: Script "${name}" no encontrado`);
         console.log('Scripts disponibles:');

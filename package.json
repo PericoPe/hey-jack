@@ -22,12 +22,17 @@
     "eject": "react-scripts eject",
     "update-events": "node src/scripts/run.js updateActiveEvents",
     "register-birthdays": "node src/scripts/run.js registerAllBirthdays",
-    "send-notifications": "node src/scripts/run.js sendEmailNotifications",
+    "send-email-notifications": "node src/scripts/run.js sendEmailNotifications",
     "register-payment": "node src/scripts/run.js registerPayment",
     "migrate-contributors": "node src/scripts/run.js migrateToContributorsTable",
     "check-emails": "node src/scripts/run.js checkMemberEmails",
     "test-email": "node src/scripts/run.js testEmail",
-    "create-contributors-table": "node src/scripts/run.js createContributorsTable"
+    "create-contributors-table": "node src/scripts/run.js createContributorsTable",
+    "send-notifications": "node src/scripts/run.js sendNotifications",
+    "add-test-contributors": "node src/scripts/run.js addTestContributors",
+    "preview-email": "node src/scripts/run.js previewEmailTemplate",
+    "force-notify": "node src/scripts/run.js forceNotify",
+    "notificar": "node src/scripts/run.js forceNotify"
   },
   "eslintConfig": {
     "extends": [

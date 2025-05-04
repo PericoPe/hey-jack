@@ -27,7 +27,7 @@ const HeroSection = () => {
                 lineHeight: 1.2
               }}
             >
-              ¿Cansado/a de perseguir padres por la colecta del profe?{' '}
+              ¿Cansado/a de perseguir padres por la colecta de un cumple?{' '}
               <Box component="span" className="text-gradient">
                 Hey Jack al rescate.
               </Box>
@@ -84,15 +84,6 @@ const HeroSection = () => {
               sx={{ mt: 3, display: 'flex', alignItems: 'center', justifyContent: { xs: 'center', sm: 'flex-start' } }}
             >
               Ya ayudamos a +500 padres a organizar colectas sin estrés
-            </Typography>
-            
-            {/* Ejemplo de acceso directo a una comunidad */}
-            <Typography 
-              variant="body2" 
-              color="text.secondary"
-              sx={{ mt: 1, display: 'flex', alignItems: 'center', justifyContent: { xs: 'center', sm: 'flex-start' } }}
-            >
-              Ejemplo: <Link to="/unirse-comunidad/instituto+sala4+azul+123456" style={{ marginLeft: '8px', color: '#4e7df0' }}>instituto+sala4+azul+123456</Link>
             </Typography>
           </Grid>
           

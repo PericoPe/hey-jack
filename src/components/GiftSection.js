@@ -1,15 +1,21 @@
 import React from 'react';
 import { Box, Container, Grid, Typography, Button, Paper } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import { giftSectionImage as giftImage } from '../assets/index';
+import { 
+  giftSectionImage as giftImage,
+  elmundoLogo,
+  cebraLogo,
+  carrouselLogo,
+  toyStoreLogo
+} from '../assets/index';
 
 const GiftSection = () => {
-  // Placeholder logos for e-commerce partners
+  // Jugueterías argentinas como aliados comerciales
   const ecommercePartners = [
-    { name: 'Amazon', logo: 'amazon-logo.png' },
-    { name: 'Mercado Libre', logo: 'mercadolibre-logo.png' },
-    { name: 'Falabella', logo: 'falabella-logo.png' },
-    { name: 'Ripley', logo: 'ripley-logo.png' }
+    { name: 'El Mundo del Juguete', logo: elmundoLogo },
+    { name: 'Cebra Jugueterías', logo: cebraLogo },
+    { name: 'Carrousel Jugueterías', logo: carrouselLogo },
+    { name: 'Toy Store Argentina', logo: toyStoreLogo }
   ];
 
   return (
@@ -75,10 +81,11 @@ const GiftSection = () => {
                     <Box 
                       sx={{ 
                         display: 'flex',
+                        flexDirection: 'column',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        height: 60,
-                        opacity: 0.7,
+                        height: 80,
+                        opacity: 0.8,
                         transition: 'all 0.3s ease',
                         '&:hover': {
                           opacity: 1,
@@ -86,7 +93,17 @@ const GiftSection = () => {
                         }
                       }}
                     >
-                      <Typography variant="body2" fontWeight="bold">
+                      <Box 
+                        component="img"
+                        src={partner.logo}
+                        alt={partner.name}
+                        sx={{ 
+                          maxHeight: 40, 
+                          maxWidth: '100%',
+                          mb: 1
+                        }}
+                      />
+                      <Typography variant="caption" fontWeight="bold" align="center">
                         {partner.name}
                       </Typography>
                     </Box>

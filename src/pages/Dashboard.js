@@ -49,7 +49,15 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const dashboardData = await getDashboardData('1'); // ID de comunidad por defecto
+        // Leer communityId y userEmail de localStorage
+        const communityId = localStorage.getItem('communityId');
+        const userEmail = localStorage.getItem('userEmail');
+        if (!communityId) {
+          setError('No se encontró la comunidad del usuario. Por favor, inicia sesión nuevamente.');
+          setLoading(false);
+          return;
+        }
+        const dashboardData = await getDashboardData(communityId);
         setData(dashboardData);
       } catch (err) {
         console.error('Error al cargar datos del dashboard:', err);

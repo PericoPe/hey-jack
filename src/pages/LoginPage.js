@@ -64,6 +64,9 @@ const LoginPage = () => {
         
         if (testUser) {
           setSuccess(true);
+          // Guardar communityId y email en localStorage para test user
+          localStorage.setItem('communityId', testUser.communityId || '1');
+          localStorage.setItem('userEmail', testUser.email);
           // Redirigir al dashboard después de un breve retraso
           setTimeout(() => {
             navigate('/dashboard');
@@ -74,6 +77,11 @@ const LoginPage = () => {
       } else {
         // Email encontrado en la base de datos
         setSuccess(true);
+        // Guardar communityId y email en localStorage para usuario real
+        if (data && data.id_comunidad) {
+          localStorage.setItem('communityId', data.id_comunidad);
+          localStorage.setItem('userEmail', email);
+        }
         // Redirigir al dashboard después de un breve retraso
         setTimeout(() => {
           navigate('/dashboard');

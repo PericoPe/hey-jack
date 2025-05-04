@@ -23,7 +23,8 @@
     "update-events": "node src/scripts/run.js updateActiveEvents",
     "register-birthdays": "node src/scripts/run.js registerAllBirthdays",
     "send-notifications": "node src/scripts/run.js sendEmailNotifications",
-    "register-payment": "node src/scripts/run.js registerPayment"
+    "register-payment": "node src/scripts/run.js registerPayment",
+    "migrate-contributors": "node src/scripts/run.js migrateToContributorsTable"
   },
   "eslintConfig": {
     "extends": [

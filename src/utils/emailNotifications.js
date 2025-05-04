@@ -99,6 +99,141 @@ const sendBirthdayNotification = async (options) => {
 };
 
 /**
+ * Envía notificaciones por email a los padres que deben aportar para un evento activo
+ * @param {Object} event - Evento activo
+ * @returns {Promise<Object>} - Resultado del envío de notificaciones
+ */
+const sendBirthdayNotifications = async (event) => {
+  try {
+    console.log(`Enviando notificaciones para el cumpleaños de ${event.nombre_hijo}...`);
+    
+    // Obtener los aportantes pendientes de la tabla eventos_activos_aportantes
+    const { data: contributors, error: contributorsError } = await supabase
+      .from('eventos_activos_aportantes')
+      .select('*')
+      .eq('id_evento', event.id_evento)
+      .eq('estado_pago', 'pendiente');
+    
+    if (contributorsError) {
+      console.error(`Error al obtener aportantes para el evento ${event.id_evento}:`, contributorsError);
+      return { success: false, error: contributorsError };
+    }
+    
+    if (!contributors || contributors.length === 0) {
+      console.log('El evento no tiene aportantes pendientes');
+      return { success: true, sent: 0, errors: 0 };
+    }
+    
+    console.log(`Se encontraron ${contributors.length} aportantes pendientes`);
+    
+    let sent = 0;
+    let errors = 0;
+    
+    // Obtener datos de la comunidad
+    const { data: communityData, error: communityError } = await supabase
+      .from('comunidades')
+      .select('*')
+      .eq('id_comunidad', event.id_comunidad)
+      .single();
+    
+    if (communityError) {
+      console.error(`Error al obtener datos de la comunidad ${event.id_comunidad}:`, communityError);
+      return { success: false, error: communityError };
+    }
+    
+    // Obtener datos del creador de la comunidad
+    const { data: creatorData, error: creatorError } = await supabase
+      .from('miembros')
+      .select('*')
+      .eq('id_comunidad', event.id_comunidad)
+      .eq('perfil', 'creador')
+      .single();
+    
+    if (creatorError) {
+      console.error(`Error al obtener datos del creador de la comunidad ${event.id_comunidad}:`, creatorError);
+      return { success: false, error: creatorError };
+    }
+    
+    // Para cada aportante pendiente, enviar una notificación
+    for (const contributor of contributors) {
+      // Verificar si ya se envió una notificación por email
+      if (contributor.notificacion_email) {
+        console.log(`Ya se envió notificación por email a ${contributor.nombre_padre}`);
+        continue;
+      }
+      
+      // Verificar si tiene email
+      if (!contributor.email_padre) {
+        console.log(`No se encontró email para ${contributor.nombre_padre}`);
+        errors++;
+        continue;
+      }
+      
+      // Enviar email
+      const emailData = {
+        to: contributor.email_padre,
+        subject: `Hey Jack está recaudando para el cumpleaños de ${event.nombre_hijo}`,
+        text: generateEmailText({
+          parentName: contributor.nombre_padre,
+          childName: event.nombre_hijo,
+          birthday: formatDate(event.fecha_cumple),
+          communityName: communityData.nombre_comunidad,
+          institution: communityData.institucion,
+          grade: communityData.grado,
+          division: communityData.division,
+          amount: contributor.monto_individual,
+          creatorName: creatorData.nombre_padre,
+          aliasMp: creatorData.alias_mp || communityData.creador_alias_mp
+        }),
+        html: generateEmailHtml({
+          parentName: contributor.nombre_padre,
+          childName: event.nombre_hijo,
+          birthday: formatDate(event.fecha_cumple),
+          communityName: communityData.nombre_comunidad,
+          institution: communityData.institucion,
+          grade: communityData.grado,
+          division: communityData.division,
+          amount: contributor.monto_individual,
+          creatorName: creatorData.nombre_padre,
+          aliasMp: creatorData.alias_mp || communityData.creador_alias_mp
+        })
+      };
+      
+      const result = await sendEmail(emailData);
+      
+      if (result.success) {
+        console.log(`✅ Notificación enviada a ${contributor.nombre_padre} (${contributor.email_padre})`);
+        
+        // Actualizar el registro en la tabla eventos_activos_aportantes
+        const { error: updateError } = await supabase
+          .from('eventos_activos_aportantes')
+          .update({
+            notificacion_email: true,
+            fecha_notificacion_email: new Date().toISOString()
+          })
+          .eq('id', contributor.id);
+        
+        if (updateError) {
+          console.error(`Error al actualizar registro de notificación para ${contributor.nombre_padre}:`, updateError);
+        }
+        
+        sent++;
+      } else {
+        console.error(`Error al enviar notificación a ${contributor.nombre_padre}:`, result.error);
+        errors++;
+      }
+    }
+    
+    console.log(`Notificaciones enviadas: ${sent}, errores: ${errors}`);
+    
+    return { success: true, sent, errors };
+  } catch (error) {
+    console.error('Error al enviar notificaciones:', error);
+    return { success: false, error };
+  }
+};
+
+/**
  * Envía notificaciones por email a todos los padres que deben aportar para un evento activo
  * @param {string} eventId - ID del evento activo
  * @returns {Promise} - Promesa con el resultado del envío
@@ -115,79 +250,14 @@ const sendNotificationsForEvent = async (eventId) => {
     if (eventError) throw eventError;
     if (!event) throw new Error(`No se encontró el evento con ID ${eventId}`);
     
-    // Obtener detalles del creador (para obtener el alias de Mercado Pago)
-    const { data: creator, error: creatorError } = await supabase
-      .from('miembros')
-      .select('*')
-      .eq('id_comunidad', event.id_comunidad)
-      .eq('nombre_padre', event.nombre_padre)
-      .single();
-    
-    if (creatorError) throw creatorError;
-    if (!creator) throw new Error(`No se encontró el creador del evento ${eventId}`);
-    
-    // Obtener todos los miembros de la comunidad que deben aportar
-    const { data: members, error: membersError } = await supabase
-      .from('miembros')
-      .select('*')
-      .eq('id_comunidad', event.id_comunidad)
-      .neq('nombre_padre', event.nombre_padre); // Excluir al padre del cumpleañero
-    
-    if (membersError) throw membersError;
-    if (!members || members.length === 0) throw new Error(`No se encontraron miembros para el evento ${eventId}`);
-    
-    console.log(`Enviando notificaciones para el evento ${eventId} a ${members.length} miembros`);
-    
-    // Enviar notificación a cada miembro
-    const results = [];
-    
-    for (const member of members) {
-      // Verificar si el miembro tiene email
-      if (!member.email_padre) {
-        console.log(`El miembro ${member.nombre_padre} no tiene email registrado`);
-        results.push({
-          parentName: member.nombre_padre,
-          success: false,
-          error: 'No tiene email registrado'
-        });
-        continue;
-      }
-      
-      // Verificar si el miembro ya ha pagado (en miembros_pendientes)
-      const memberPending = event.miembros_pendientes.find(m => m.nombre_padre === member.nombre_padre);
-      if (!memberPending || memberPending.estado_pago !== 'pendiente') {
-        console.log(`El miembro ${member.nombre_padre} ya ha pagado o no está en la lista de pendientes`);
-        results.push({
-          parentName: member.nombre_padre,
-          success: false,
-          error: 'Ya ha pagado o no está en la lista de pendientes'
-        });
-        continue;
-      }
-      
-      // Enviar notificación
-      const result = await sendBirthdayNotification({
-        to: member.email_padre,
-        parentName: member.nombre_padre,
-        childName: event.nombre_hijo,
-        birthdayDate: event.fecha_cumple,
-        communityName: event.nombre_comunidad,
-        amount: memberPending.monto_individual,
-        mpAlias: creator.alias_mp
-      });
-      
-      results.push({
-        parentName: member.nombre_padre,
-        success: result.success,
-        messageId: result.messageId,
-        error: result.error
-      });
-    }
+    // Enviar notificaciones
+    const result = await sendBirthdayNotifications(event);
     
     return {
       success: true,
       eventId,
-      results
+      sent: result.sent,
+      errors: result.errors
     };
   } catch (error) {
     console.error(`Error al enviar notificaciones para el evento ${eventId}:`, error);

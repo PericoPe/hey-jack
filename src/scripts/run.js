@@ -35,6 +35,9 @@ const runScript = async (name) => {
       case 'registerPayment':
         require('./registerPayment');
         break;
+      case 'migrateToContributorsTable':
+        require('./migrate_to_contributors_table');
+        break;
       default:
         console.error(`❌ Error: Script "${name}" no encontrado`);
         console.log('Scripts disponibles:');
@@ -42,6 +45,7 @@ const runScript = async (name) => {
         console.log('  - registerAllBirthdays: Registra todos los cumpleaños en la tabla eventos');
         console.log('  - sendEmailNotifications: Envía notificaciones por email para eventos activos');
         console.log('  - registerPayment: Registra pagos para eventos activos');
+        console.log('  - migrateToContributorsTable: Migra datos a la tabla eventos_activos_aportantes');
         process.exit(1);
     }
   } catch (error) {

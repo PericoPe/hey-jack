@@ -46,58 +46,88 @@ const AdminDashboard = ({ setNotification }) => {
     fetchDashboardData();
   }, []);
 
-  // Obtener datos del dashboard
+  // Obtener datos del dashboard - versión optimizada
   const fetchDashboardData = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      // Obtener estadísticas de comunidades
-      const { data: communities, error: communitiesError } = await supabase
-        .from('comunidades')
-        .select('id_comunidad, estado');
+      // Realizar todas las consultas en paralelo para mejorar el rendimiento
+      const [
+        communitiesResponse,
+        membersResponse,
+        eventsResponse,
+        activeEventsResponse,
+        aportantesResponse,
+        recentEventsResponse,
+        recentMembersResponse,
+        recentPaymentsResponse
+      ] = await Promise.all([
+        // 1. Obtener estadísticas de comunidades
+        supabase.from('comunidades').select('id_comunidad, nombre_comunidad, estado'),
+        
+        // 2. Obtener estadísticas de miembros
+        supabase.from('miembros').select('id, id_comunidad'),
+        
+        // 3. Obtener estadísticas de eventos
+        supabase.from('eventos').select('id_evento, id_comunidad'),
+        
+        // 4. Obtener estadísticas de eventos activos
+        supabase.from('eventos_activos').select('id_evento, nombre_hijo, nombre_comunidad, monto_total_recaudado, estado'),
+        
+        // 5. Obtener información de aportantes
+        supabase.from('eventos_activos_aportantes').select('id_evento, monto_individual, estado_pago'),
+        
+        // 6. Obtener eventos recientes
+        supabase.from('eventos_activos')
+          .select('id_evento, nombre_hijo, nombre_comunidad, fecha_cumple, fecha_creacion, estado')
+          .order('fecha_creacion', { ascending: false })
+          .limit(5),
+        
+        // 7. Obtener miembros recientes
+        supabase.from('miembros')
+          .select('id, nombre_padre, nombre_hijo, id_comunidad, fecha_creacion')
+          .order('fecha_creacion', { ascending: false })
+          .limit(5),
+          
+        // 8. Obtener pagos recientes
+        supabase.from('eventos_activos_aportantes')
+          .select('id, nombre_padre, monto_individual, estado_pago, fecha_actualizacion')
+          .eq('estado_pago', 'pagado')
+          .order('fecha_actualizacion', { ascending: false })
+          .limit(5)
+      ]);
       
-      if (communitiesError) throw communitiesError;
+      // Verificar errores en las respuestas
+      if (communitiesResponse.error) throw new Error(`Error en comunidades: ${communitiesResponse.error.message}`);
+      if (membersResponse.error) throw new Error(`Error en miembros: ${membersResponse.error.message}`);
+      if (eventsResponse.error) throw new Error(`Error en eventos: ${eventsResponse.error.message}`);
+      if (activeEventsResponse.error) throw new Error(`Error en eventos activos: ${activeEventsResponse.error.message}`);
+      if (aportantesResponse.error) throw new Error(`Error en aportantes: ${aportantesResponse.error.message}`);
+      if (recentEventsResponse.error) throw new Error(`Error en eventos recientes: ${recentEventsResponse.error.message}`);
+      if (recentMembersResponse.error) throw new Error(`Error en miembros recientes: ${recentMembersResponse.error.message}`);
+      if (recentPaymentsResponse.error) throw new Error(`Error en pagos recientes: ${recentPaymentsResponse.error.message}`);
       
-      // Contar comunidades activas e inactivas
+      // Extraer datos de las respuestas
+      const communities = communitiesResponse.data || [];
+      const members = membersResponse.data || [];
+      const events = eventsResponse.data || [];
+      const activeEvents = activeEventsResponse.data || [];
+      const aportantes = aportantesResponse.data || [];
+      const recentEvents = recentEventsResponse.data || [];
+      const recentMembers = recentMembersResponse.data || [];
+      const recentPayments = recentPaymentsResponse.data || [];
+      
+      // Procesar datos para estadísticas
       const activeCommunitiesCount = communities.filter(c => c.estado === 'activa').length;
       const inactiveCommunitiesCount = communities.filter(c => c.estado === 'inactiva').length;
       
-      // Obtener estadísticas de miembros
-      const { data: members, error: membersError } = await supabase
-        .from('miembros')
-        .select('id');
-      
-      if (membersError) throw membersError;
-      
-      // Obtener estadísticas de eventos
-      const { data: events, error: eventsError } = await supabase
-        .from('eventos')
-        .select('id_evento');
-      
-      if (eventsError) throw eventsError;
-      
-      // Obtener estadísticas de eventos activos
-      const { data: activeEvents, error: activeEventsError } = await supabase
-        .from('eventos_activos')
-        .select('id_evento, monto_total_recaudado, estado');
-      
-      if (activeEventsError) throw activeEventsError;
-      
-      // Filtrar eventos por estado
       const activeEventsFiltered = activeEvents.filter(e => e.estado === 'activo');
       const pendingEvents = activeEvents.filter(e => e.estado === 'pendiente').length;
       const completedEvents = activeEvents.filter(e => e.estado === 'completado').length;
       
       // Calcular monto total recaudado
       const totalRaised = activeEventsFiltered.reduce((sum, event) => sum + (parseFloat(event.monto_total_recaudado) || 0), 0);
-      
-      // Obtener información de aportantes para calcular montos pendientes y promedio
-      const { data: aportantes, error: aportantesError } = await supabase
-        .from('eventos_activos_aportantes')
-        .select('id_evento, monto_individual, estado_pago');
-      
-      if (aportantesError) throw aportantesError;
       
       // Calcular monto pendiente de pago
       const pendingAmount = aportantes
@@ -108,6 +138,21 @@ const AdminDashboard = ({ setNotification }) => {
       const totalContributions = aportantes.length;
       const totalContributionAmount = aportantes.reduce((sum, a) => sum + (parseFloat(a.monto_individual) || 0), 0);
       const averageContribution = totalContributions > 0 ? totalContributionAmount / totalContributions : 0;
+      
+      // Calcular miembros por comunidad
+      const membersByCommunity = {};
+      communities.forEach(community => {
+        membersByCommunity[community.id_comunidad] = {
+          name: community.nombre_comunidad,
+          count: 0
+        };
+      });
+      
+      members.forEach(member => {
+        if (membersByCommunity[member.id_comunidad]) {
+          membersByCommunity[member.id_comunidad].count++;
+        }
+      });
       
       // Actualizar estadísticas
       setStats({
@@ -121,26 +166,9 @@ const AdminDashboard = ({ setNotification }) => {
         completedEvents,
         totalRaised,
         pendingAmount,
-        averageContribution
+        averageContribution,
+        membersByCommunity: Object.values(membersByCommunity)
       });
-      
-      // Obtener actividades recientes (últimos 10 eventos activos)
-      const { data: recentEvents, error: recentEventsError } = await supabase
-        .from('eventos_activos')
-        .select('id_evento, nombre_hijo, nombre_comunidad, fecha_cumple, fecha_creacion, estado')
-        .order('fecha_creacion', { ascending: false })
-        .limit(5);
-      
-      if (recentEventsError) throw recentEventsError;
-      
-      // Obtener últimos miembros añadidos
-      const { data: recentMembers, error: recentMembersError } = await supabase
-        .from('miembros')
-        .select('id, nombre_padre, nombre_hijo, id_comunidad, fecha_creacion')
-        .order('fecha_creacion', { ascending: false })
-        .limit(5);
-      
-      if (recentMembersError) throw recentMembersError;
       
       // Combinar actividades recientes
       const activities = [
@@ -157,6 +185,13 @@ const AdminDashboard = ({ setNotification }) => {
           title: `Miembro: ${member.nombre_padre}`,
           description: `Hijo: ${member.nombre_hijo} - ID Comunidad: ${member.id_comunidad}`,
           date: member.fecha_creacion
+        })),
+        ...recentPayments.map(payment => ({
+          type: 'payment',
+          id: payment.id,
+          title: `Pago: ${payment.nombre_padre}`,
+          description: `Monto: ${formatAmount(payment.monto_individual)}`,
+          date: payment.fecha_actualizacion
         }))
       ];
       
@@ -445,88 +480,95 @@ const AdminDashboard = ({ setNotification }) => {
             </Grid>
           </Paper>
         </Grid>
-      
-      {/* Actividades recientes */}
-      <Paper sx={{ p: 3, mb: 4, boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
-        <Typography variant="h5" component="h3" sx={{ mb: 2, fontWeight: 'bold' }}>
-          Actividades Recientes
-        </Typography>
         
-        <Divider sx={{ mb: 2 }} />
-        
-        {recentActivities.length > 0 ? (
-          <List>
-            {recentActivities.map((activity, index) => (
-              <React.Fragment key={`${activity.type}-${activity.id}`}>
-                {index > 0 && <Divider component="li" />}
-                <ListItem alignItems="flex-start">
-                  <ListItemIcon>
-                    {activity.type === 'event' ? <EventIcon color="primary" /> : <PeopleAltIcon color="secondary" />}
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={activity.title}
-                    secondary={
-                      <React.Fragment>
-                        <Typography component="span" variant="body2" color="text.primary">
-                          {activity.description}
-                        </Typography>
-                        {" — "}{formatDate(activity.date)}
-                      </React.Fragment>
-                    }
-                  />
-                </ListItem>
-              </React.Fragment>
-            ))}
-          </List>
-        ) : (
-          <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
-            No hay actividades recientes para mostrar.
-          </Typography>
-        )}
-      </Paper>
+        {/* Actividades recientes */}
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 3, height: '100%', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
+            <Typography variant="h5" component="h3" sx={{ mb: 2, fontWeight: 'bold' }}>
+              Actividades Recientes
+            </Typography>
+            
+            <Divider sx={{ mb: 2 }} />
+            
+            {recentActivities.length > 0 ? (
+              <List>
+                {recentActivities.map((activity, index) => (
+                  <React.Fragment key={`${activity.type}-${activity.id}`}>
+                    {index > 0 && <Divider component="li" />}
+                    <ListItem alignItems="flex-start">
+                      <ListItemIcon>
+                        {activity.type === 'event' ? <EventIcon color="primary" /> : <PeopleAltIcon color="secondary" />}
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={activity.title}
+                        secondary={
+                          <React.Fragment>
+                            <Typography component="span" variant="body2" color="text.primary">
+                              {activity.description}
+                            </Typography>
+                            {" — "}{formatDate(activity.date)}
+                          </React.Fragment>
+                        }
+                      />
+                    </ListItem>
+                  </React.Fragment>
+                ))}
+              </List>
+            ) : (
+              <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
+                No hay actividades recientes para mostrar.
+              </Typography>
+            )}
+          </Paper>
+        </Grid>
+      </Grid>
       
       {/* Información del sistema */}
-      <Paper sx={{ p: 3, boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
-        <Typography variant="h5" component="h3" sx={{ mb: 2, fontWeight: 'bold' }}>
-          Información del Sistema
-        </Typography>
-        
-        <Divider sx={{ mb: 2 }} />
-        
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={6}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
-              Administrador:
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 2 }}>
-              javierhursino@gmail.com
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <Paper sx={{ p: 3, boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
+            <Typography variant="h5" component="h3" sx={{ mb: 2, fontWeight: 'bold' }}>
+              Información del Sistema
             </Typography>
             
-            <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
-              Versión de la aplicación:
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 2 }}>
-              1.0.0
-            </Typography>
-          </Grid>
-          
-          <Grid item xs={12} md={6}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
-              Fecha y hora actual:
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 2 }}>
-              {formatDate(new Date().toISOString())}
-            </Typography>
+            <Divider sx={{ mb: 2 }} />
             
-            <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
-              Estado del sistema:
-            </Typography>
-            <Typography variant="body1" sx={{ color: '#4caf50', fontWeight: 'medium' }}>
-              Operativo
-            </Typography>
-          </Grid>
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
+                  Administrador:
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  javierhursino@gmail.com
+                </Typography>
+                
+                <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
+                  Versión de la aplicación:
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  1.0.0
+                </Typography>
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
+                  Fecha y hora actual:
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  {formatDate(new Date().toISOString())}
+                </Typography>
+                
+                <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
+                  Estado del sistema:
+                </Typography>
+                <Typography variant="body1" sx={{ color: '#4caf50', fontWeight: 'medium' }}>
+                  Operativo
+                </Typography>
+              </Grid>
+            </Grid>
+          </Paper>
         </Grid>
-      </Paper>
+      </Grid>
     </Box>
   );
 };

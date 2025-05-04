@@ -31,18 +31,13 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
-  Checkbox,
-  Card,
-  CardContent,
-  CardActions
+  Checkbox
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import HistoryIcon from '@mui/icons-material/History';
 import EventIcon from '@mui/icons-material/Event';
-import GroupIcon from '@mui/icons-material/Group';
 import EmailIcon from '@mui/icons-material/Email';
-import PersonIcon from '@mui/icons-material/Person';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import supabase from '../../utils/supabaseClient';
@@ -118,66 +113,25 @@ Equipo Hey Jack`);
     setLoading(true);
     
     try {
-      // Primero obtenemos los aportantes básicos
-      const { data: aportantesBasicos, error: errorAportantes } = await supabase
+      // Consulta optimizada que une eventos_activos_aportantes con miembros en una sola consulta
+      const { data, error } = await supabase
         .from('eventos_activos_aportantes')
-        .select('*')
+        .select(`
+          *,
+          miembros!inner(nombre_padre, telefono, whatsapp)
+        `)
         .eq('id_evento', eventId)
         .order('nombre_padre', { ascending: true });
       
-      if (errorAportantes) throw errorAportantes;
+      if (error) throw error;
       
-      // Si no hay aportantes, terminamos
-      if (!aportantesBasicos || aportantesBasicos.length === 0) {
-        setContributors([]);
-        setSelectedContributors([]);
-        return;
-      }
-      
-      // Para cada aportante, verificamos si necesitamos actualizar su información desde miembros
-      const aportantesActualizados = [];
-      
-      for (const aportante of aportantesBasicos) {
-        // Si el aportante tiene email, buscamos su información completa en miembros
-        if (aportante.email_padre) {
-          const { data: miembroData, error: miembroError } = await supabase
-            .from('miembros')
-            .select('*')
-            .eq('email_padre', aportante.email_padre)
-            .maybeSingle();
-          
-          if (!miembroError && miembroData) {
-            // Actualizamos la información del aportante con los datos del miembro
-            aportantesActualizados.push({
-              ...aportante,
-              nombre_padre: miembroData.nombre_padre || aportante.nombre_padre,
-              telefono: miembroData.telefono || aportante.telefono,
-              whatsapp: miembroData.whatsapp || aportante.whatsapp
-            });
-            
-            // También actualizamos el registro en la base de datos si es necesario
-            if (aportante.nombre_padre !== miembroData.nombre_padre || 
-                aportante.telefono !== miembroData.telefono || 
-                aportante.whatsapp !== miembroData.whatsapp) {
-              
-              await supabase
-                .from('eventos_activos_aportantes')
-                .update({
-                  nombre_padre: miembroData.nombre_padre,
-                  telefono: miembroData.telefono,
-                  whatsapp: miembroData.whatsapp
-                })
-                .eq('id', aportante.id);
-            }
-          } else {
-            // Si no encontramos el miembro, usamos los datos originales
-            aportantesActualizados.push(aportante);
-          }
-        } else {
-          // Si no tiene email, usamos los datos originales
-          aportantesActualizados.push(aportante);
-        }
-      }
+      // Procesamos los resultados para tener un formato más limpio
+      const aportantesActualizados = data?.map(aportante => ({
+        ...aportante,
+        nombre_padre: aportante.miembros?.nombre_padre || aportante.nombre_padre,
+        telefono: aportante.miembros?.telefono || aportante.telefono,
+        whatsapp: aportante.miembros?.whatsapp || aportante.whatsapp
+      })) || [];
       
       setContributors(aportantesActualizados);
       setSelectedContributors([]); // Resetear selección

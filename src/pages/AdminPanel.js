@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { 
   Box, 
   Container, 
@@ -13,20 +13,27 @@ import {
   Snackbar
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import AdminCommunities from '../components/admin/AdminCommunities';
-import AdminMembers from '../components/admin/AdminMembers';
-import AdminEvents from '../components/admin/AdminEvents';
-import AdminActiveEvents from '../components/admin/AdminActiveEvents';
-import AdminNotifications from '../components/admin/AdminNotifications';
-import AdminDashboard from '../components/admin/AdminDashboard';
+
+// Importaciones de iconos
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
 import GroupWorkIcon from '@mui/icons-material/GroupWork';
 import EventIcon from '@mui/icons-material/Event';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import SyncIcon from '@mui/icons-material/Sync';
 import LogoutIcon from '@mui/icons-material/Logout';
-import supabase from '../utils/supabaseClient';
+import BugReportIcon from '@mui/icons-material/BugReport';
+
+// Importaciones con carga diferida para mejorar el rendimiento inicial
+const AdminDashboard = lazy(() => import('../components/admin/AdminDashboard'));
+const AdminCommunities = lazy(() => import('../components/admin/AdminCommunities'));
+const AdminMembers = lazy(() => import('../components/admin/AdminMembers'));
+const AdminEvents = lazy(() => import('../components/admin/AdminEvents'));
+const AdminActiveEvents = lazy(() => import('../components/admin/AdminActiveEvents'));
+const AdminNotifications = lazy(() => import('../components/admin/AdminNotifications'));
+const AdminSyncTools = lazy(() => import('../components/admin/AdminSyncTools'));
+const AdminDiagnostic = lazy(() => import('../components/admin/AdminDiagnostic'));
 
 // Componente TabPanel para mostrar el contenido de cada pestaña
 function TabPanel(props) {
@@ -43,7 +50,9 @@ function TabPanel(props) {
     >
       {value === index && (
         <Box sx={{ p: 3 }}>
-          {children}
+          <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>}>
+            {children}
+          </Suspense>
         </Box>
       )}
     </div>
@@ -60,19 +69,15 @@ const AdminPanel = () => {
   const [error, setError] = useState('');
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
 
-  // Verificar si el usuario está autorizado
+  // Verificar si el usuario está autorizado - versión optimizada
   useEffect(() => {
-    const checkAuthorization = async () => {
-      const adminEmail = localStorage.getItem('adminEmail');
-      
-      if (adminEmail === 'javierhursino@gmail.com') {
-        setAuthorized(true);
-      }
-      
-      setLoading(false);
-    };
+    const adminEmail = localStorage.getItem('adminEmail');
     
-    checkAuthorization();
+    if (adminEmail === 'javierhursino@gmail.com') {
+      setAuthorized(true);
+    }
+    
+    setLoading(false);
   }, []);
 
   // Manejar cambio de pestaña
@@ -250,55 +255,107 @@ const AdminPanel = () => {
             </Box>
             
             {/* Pestañas */}
-            <Box sx={{ borderBottom: 1, borderColor: 'divider', backgroundColor: '#f5f5f5' }}>
-              <Tabs 
-                value={tabValue} 
-                onChange={handleTabChange} 
-                variant="scrollable"
-                scrollButtons="auto"
-                sx={{ 
-                  '& .MuiTab-root': { 
-                    minHeight: '64px',
-                    fontSize: '0.9rem',
-                    fontWeight: 'medium'
-                  }
-                }}
-              >
-                <Tab icon={<DashboardIcon />} label="Dashboard" iconPosition="start" />
-                <Tab icon={<GroupWorkIcon />} label="Comunidades" iconPosition="start" />
-                <Tab icon={<PeopleIcon />} label="Miembros" iconPosition="start" />
-                <Tab icon={<EventIcon />} label="Eventos" iconPosition="start" />
-                <Tab icon={<EventAvailableIcon />} label="Eventos Activos" iconPosition="start" />
-                <Tab icon={<NotificationsIcon />} label="Notificaciones" iconPosition="start" />
-              </Tabs>
-            </Box>
-            
-            {/* Contenido de las pestañas */}
-            <Box sx={{ flex: 1, overflow: 'auto' }}>
-              <TabPanel value={tabValue} index={0}>
-                <AdminDashboard setNotification={setNotification} />
-              </TabPanel>
-              
-              <TabPanel value={tabValue} index={1}>
-                <AdminCommunities setNotification={setNotification} />
-              </TabPanel>
-              
-              <TabPanel value={tabValue} index={2}>
-                <AdminMembers setNotification={setNotification} />
-              </TabPanel>
-              
-              <TabPanel value={tabValue} index={3}>
-                <AdminEvents setNotification={setNotification} />
-              </TabPanel>
-              
-              <TabPanel value={tabValue} index={4}>
-                <AdminActiveEvents setNotification={setNotification} />
-              </TabPanel>
-              
-              <TabPanel value={tabValue} index={5}>
-                <AdminNotifications setNotification={setNotification} />
-              </TabPanel>
-            </Box>
+            {authorized && (
+              <Box sx={{ width: '100%', bgcolor: 'background.paper', borderRadius: 2, overflow: 'hidden' }}>
+                <Tabs
+                  value={tabValue}
+                  onChange={handleTabChange}
+                  variant="scrollable"
+                  scrollButtons="auto"
+                  aria-label="admin tabs"
+                  sx={{
+                    borderBottom: 1,
+                    borderColor: 'divider',
+                    bgcolor: '#f5f9ff',
+                    '& .MuiTab-root': {
+                      py: 2,
+                      minHeight: 64
+                    }
+                  }}
+                >
+                  <Tab 
+                    icon={<DashboardIcon />} 
+                    label="Dashboard" 
+                    iconPosition="start"
+                    sx={{ flexDirection: 'row', alignItems: 'center' }}
+                  />
+                  <Tab 
+                    icon={<GroupWorkIcon />} 
+                    label="Comunidades" 
+                    iconPosition="start"
+                    sx={{ flexDirection: 'row', alignItems: 'center' }}
+                  />
+                  <Tab 
+                    icon={<PeopleIcon />} 
+                    label="Miembros" 
+                    iconPosition="start"
+                    sx={{ flexDirection: 'row', alignItems: 'center' }}
+                  />
+                  <Tab 
+                    icon={<EventIcon />} 
+                    label="Eventos" 
+                    iconPosition="start"
+                    sx={{ flexDirection: 'row', alignItems: 'center' }}
+                  />
+                  <Tab 
+                    icon={<EventAvailableIcon />} 
+                    label="Eventos Activos" 
+                    iconPosition="start"
+                    sx={{ flexDirection: 'row', alignItems: 'center' }}
+                  />
+                  <Tab 
+                    icon={<NotificationsIcon />} 
+                    label="Notificaciones" 
+                    iconPosition="start"
+                    sx={{ flexDirection: 'row', alignItems: 'center' }}
+                  />
+                  <Tab 
+                    icon={<SyncIcon />} 
+                    label="Sincronización" 
+                    iconPosition="start"
+                    sx={{ flexDirection: 'row', alignItems: 'center' }}
+                  />
+                  <Tab 
+                    icon={<BugReportIcon />} 
+                    label="Diagnóstico" 
+                    iconPosition="start"
+                    sx={{ flexDirection: 'row', alignItems: 'center' }}
+                  />
+                </Tabs>
+                
+                <TabPanel value={tabValue} index={0}>
+                  <AdminDashboard setNotification={setNotification} />
+                </TabPanel>
+                
+                <TabPanel value={tabValue} index={1}>
+                  <AdminCommunities setNotification={setNotification} />
+                </TabPanel>
+                
+                <TabPanel value={tabValue} index={2}>
+                  <AdminMembers setNotification={setNotification} />
+                </TabPanel>
+                
+                <TabPanel value={tabValue} index={3}>
+                  <AdminEvents setNotification={setNotification} />
+                </TabPanel>
+                
+                <TabPanel value={tabValue} index={4}>
+                  <AdminActiveEvents setNotification={setNotification} />
+                </TabPanel>
+                
+                <TabPanel value={tabValue} index={5}>
+                  <AdminNotifications setNotification={setNotification} />
+                </TabPanel>
+                
+                <TabPanel value={tabValue} index={6}>
+                  <AdminSyncTools setNotification={setNotification} />
+                </TabPanel>
+                
+                <TabPanel value={tabValue} index={7}>
+                  <AdminDiagnostic setNotification={setNotification} />
+                </TabPanel>
+              </Box>
+            )}
           </Box>
         </Paper>
       </Container>

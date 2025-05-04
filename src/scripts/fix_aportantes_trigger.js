@@ -3,16 +3,16 @@
  * Este script crea un trigger en Supabase que añade automáticamente un miembro
  * a todos los eventos activos de su comunidad cuando es creado
  */
+require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 
-// Crear cliente de Supabase
-const supabaseUrl = 'https://xpwfqfpwhnzuazvfltcx.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhwd2ZxZnB3aG56dWF6dmZsdGN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYzMDU0NDQsImV4cCI6MjA2MTg4MTQ0NH0.7fYccKYRbqafy3sQX2cHTtWqtPSdtGfjZvOQnj4jQA8';
+// Inicializar cliente de Supabase
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-/**
- * Función principal
- */
+console.log('=== CREACIÓN DE TRIGGER PARA SINCRONIZACIÓN AUTOMÁTICA DE MIEMBROS Y APORTANTES ===\n');
+
 async function main() {
   console.log('=== CORRECCIÓN DE TABLA EVENTOS_ACTIVOS_APORTANTES ===');
   

@@ -30,17 +30,15 @@ import {
   ListItemSecondaryAction,
   TextField
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import PersonIcon from '@mui/icons-material/Person';
 import EmailIcon from '@mui/icons-material/Email';
+import SendIcon from '@mui/icons-material/Send';
+import EditIcon from '@mui/icons-material/Edit';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
-import SendIcon from '@mui/icons-material/Send';
 import supabase from '../../utils/supabaseClient';
 
 const AdminActiveEvents = ({ setNotification }) => {
@@ -83,72 +81,70 @@ const AdminActiveEvents = ({ setNotification }) => {
     }
   };
 
-  // Obtener aportantes de un evento con información completa de miembros
+  // Obtener aportantes de un evento con información completa de miembros - versión mejorada
   const fetchContributors = async (eventId) => {
     setLoadingContributors(prev => ({ ...prev, [eventId]: true }));
     
     try {
-      // Primero obtenemos los aportantes básicos
-      const { data: aportantesBasicos, error: errorAportantes } = await supabase
+      // Primero obtenemos el id_comunidad del evento para poder filtrar mejor
+      const { data: eventoData, error: eventoError } = await supabase
+        .from('eventos_activos')
+        .select('id_comunidad')
+        .eq('id_evento', eventId)
+        .single();
+      
+      if (eventoError) throw eventoError;
+      
+      // Consulta simple para obtener aportantes
+      const { data, error } = await supabase
         .from('eventos_activos_aportantes')
         .select('*')
         .eq('id_evento', eventId)
+        .eq('id_comunidad', eventoData.id_comunidad)
         .order('fecha_creacion', { ascending: false });
       
-      if (errorAportantes) throw errorAportantes;
-      
-      // Si no hay aportantes, terminamos
-      if (!aportantesBasicos || aportantesBasicos.length === 0) {
-        setContributors(prev => ({ ...prev, [eventId]: [] }));
-        return;
-      }
-      
-      // Para cada aportante, verificamos si necesitamos actualizar su información desde miembros
-      const aportantesActualizados = [];
-      
-      for (const aportante of aportantesBasicos) {
-        // Si el aportante tiene email, buscamos su información completa en miembros
-        if (aportante.email_padre) {
-          const { data: miembroData, error: miembroError } = await supabase
+      if (error) {
+        // Si falla la consulta con join, intentamos una consulta más simple
+        console.warn('Error en consulta con join, intentando consulta alternativa:', error);
+        
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('eventos_activos_aportantes')
+          .select('*')
+          .eq('id_evento', eventId)
+          .order('fecha_creacion', { ascending: false });
+          
+        if (fallbackError) throw fallbackError;
+        
+        // Para cada aportante, buscamos su información en miembros
+        const aportantesCompletos = [];
+        
+        for (const aportante of fallbackData || []) {
+          // Buscamos el miembro por email_padre
+          const { data: miembroData } = await supabase
             .from('miembros')
             .select('*')
             .eq('email_padre', aportante.email_padre)
+            .eq('id_comunidad', eventoData.id_comunidad)
             .maybeSingle();
           
-          if (!miembroError && miembroData) {
-            // Actualizamos la información del aportante con los datos del miembro
-            aportantesActualizados.push({
-              ...aportante,
-              nombre_padre: miembroData.nombre_padre || aportante.nombre_padre,
-              telefono: miembroData.telefono || aportante.telefono,
-              whatsapp: miembroData.whatsapp || aportante.whatsapp
-            });
-            
-            // También actualizamos el registro en la base de datos si es necesario
-            if (aportante.nombre_padre !== miembroData.nombre_padre || 
-                aportante.telefono !== miembroData.telefono || 
-                aportante.whatsapp !== miembroData.whatsapp) {
-              
-              await supabase
-                .from('eventos_activos_aportantes')
-                .update({
-                  nombre_padre: miembroData.nombre_padre,
-                  telefono: miembroData.telefono,
-                  whatsapp: miembroData.whatsapp
-                })
-                .eq('id', aportante.id);
-            }
-          } else {
-            // Si no encontramos el miembro, usamos los datos originales
-            aportantesActualizados.push(aportante);
-          }
-        } else {
-          // Si no tiene email, usamos los datos originales
-          aportantesActualizados.push(aportante);
+          aportantesCompletos.push({
+            ...aportante,
+            nombre_padre: miembroData?.nombre_padre || aportante.nombre_padre,
+            telefono: miembroData?.telefono || aportante.telefono,
+            whatsapp: miembroData?.whatsapp_padre || aportante.whatsapp,
+            id_miembro: miembroData?.id || aportante.id_miembro
+          });
         }
+        
+        setContributors(prev => ({ ...prev, [eventId]: aportantesCompletos }));
+        return;
       }
       
+      // Usamos directamente los datos de aportantes
+      const aportantesActualizados = data || [];
+      
       setContributors(prev => ({ ...prev, [eventId]: aportantesActualizados }));
+    
     } catch (error) {
       console.error(`Error al obtener aportantes del evento ${eventId}:`, error);
       setNotification({

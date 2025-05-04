@@ -322,21 +322,7 @@ const JoinCommunity = () => {
           </Grid>
         </Grid>
         
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          fullWidth
-          size="large"
-          disabled={loading}
-          sx={{ py: 1.5, mt: 3 }}
-        >
-          {loading ? (
-            <CircularProgress size={24} color="inherit" />
-          ) : (
-            'Unirse a la comunidad'
-          )}
-        </Button>
+        {/* Botón eliminado para evitar duplicación */}
       </Box>
     );
   };

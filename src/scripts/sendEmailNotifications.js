@@ -1,13 +1,8 @@
-/**
- * Script para enviar notificaciones por email a los padres
- * sobre los eventos activos de cumpleaños
- */
+
 const { verifyEmailConnection } = require('../utils/emailConfig');
 const { sendNotificationsForAllActiveEvents } = require('../utils/emailNotifications');
 
-/**
- * Función principal
- */
+
 const main = async () => {
   console.log('Iniciando envío de notificaciones por email...');
   console.log('Fecha actual:', new Date().toISOString());

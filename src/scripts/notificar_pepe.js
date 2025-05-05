@@ -1,12 +1,10 @@
-/**
- * Script simple para notificar a Pepe Argento sobre el cumpleaños de Milan
- */
+
 const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
 
 // Crear cliente de Supabase
 const supabaseUrl = 'https://xpwfqfpwhnzuazvfltcx.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhwd2ZxZnB3aG56dWF6dmZsdGN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYzMDU0NDQsImV4cCI6MjA2MTg4MTQ0NH0.7fYccKYRbqafy3sQX2cHTtWqtPSdtGfjZvOQnj4jQA8';
+const supabaseKey "[REDACTED]";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Configuración del transportador de email
@@ -16,7 +14,7 @@ const transporter = nodemailer.createTransport({
   secure: true,
   auth: {
     user: 'javierhursino@gmail.com',
-    pass: 'vrrh pefi imgf zfdb'
+    pass: "[REDACTED]"
   }
 });
 

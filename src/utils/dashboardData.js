@@ -164,7 +164,11 @@ const getUpcomingBirthdays = async (communityId) => {
         }
         
         // Calcular días restantes
-        const daysRemaining = Math.ceil((thisYearBirthday - today) / (1000 * 60 * 60 * 24));
+        // Usamos Math.floor en lugar de Math.ceil para evitar mostrar un día menos
+        // y establecemos la hora a 00:00:00 para ambas fechas para evitar problemas con las horas
+        const todayNoTime = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const birthdayNoTime = new Date(thisYearBirthday.getFullYear(), thisYearBirthday.getMonth(), thisYearBirthday.getDate());
+        const daysRemaining = Math.floor((birthdayNoTime - todayNoTime) / (1000 * 60 * 60 * 24));
         
         return {
           ...member,

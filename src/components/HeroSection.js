@@ -77,7 +77,7 @@ const HeroSection = () => {
             >
               ¿Cansado/a de perseguir padres por la colecta de un cumple?{' '}
               <Box component="span" className="text-gradient">
-                Hey Jack al rescate.
+                Hey Jack se ocupa por vos.
               </Box>
             </Typography>
             

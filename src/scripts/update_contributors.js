@@ -1,13 +1,9 @@
-/**
- * Script para actualizar montos individuales y estado de notificaciones
- */
+
 const supabase = require('../utils/supabaseClient');
 const fs = require('fs');
 const path = require('path');
 
-/**
- * Función principal
- */
+
 const main = async () => {
   console.log('=== ACTUALIZAR APORTANTES ===');
   console.log('Fecha actual:', new Date().toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' }));

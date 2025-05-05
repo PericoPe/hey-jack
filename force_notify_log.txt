@@ -1,4 +1,0 @@
-=== FORZAR ENVÍO DE NOTIFICACIONES ===
-Fecha: 4/5/2025, 04:08:29
-
-Verificando conexión SMTP...

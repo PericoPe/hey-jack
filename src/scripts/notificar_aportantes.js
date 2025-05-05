@@ -1,6 +1,4 @@
-/**
- * Script para enviar notificaciones por email a todos los aportantes
- */
+
 const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
 const fs = require('fs');
@@ -8,7 +6,7 @@ const path = require('path');
 
 // Crear cliente de Supabase
 const supabaseUrl = 'https://xpwfqfpwhnzuazvfltcx.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhwd2ZxZnB3aG56dWF6dmZsdGN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYzMDU0NDQsImV4cCI6MjA2MTg4MTQ0NH0.7fYccKYRbqafy3sQX2cHTtWqtPSdtGfjZvOQnj4jQA8';
+const supabaseKey "[REDACTED]";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Configuración del transportador de email
@@ -18,7 +16,7 @@ const transporter = nodemailer.createTransport({
   secure: true,
   auth: {
     user: 'javierhursino@gmail.com',
-    pass: 'vrrh pefi imgf zfdb'
+    pass: "[REDACTED]"
   }
 });
 
@@ -49,9 +47,7 @@ fs.writeFileSync(logFile, `
   <hr>
 `);
 
-/**
- * Genera el HTML para un email de notificación
- */
+
 function generateEmailHTML(data) {
   return `
     <!DOCTYPE html>
@@ -104,9 +100,7 @@ function generateEmailHTML(data) {
   `;
 }
 
-/**
- * Función principal
- */
+
 async function main() {
   console.log('=== ENVÍO DE NOTIFICACIONES A APORTANTES ===');
   console.log('Fecha:', new Date().toLocaleString('es-AR'));

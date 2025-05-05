@@ -1,7 +1,4 @@
-/**
- * Script para forzar el envío de notificaciones por email a los aportantes
- * Envía notificaciones independientemente del estado de notificación
- */
+
 const supabase = require('../utils/supabaseClient');
 const nodemailer = require('nodemailer');
 const fs = require('fs');
@@ -14,7 +11,7 @@ const transporter = nodemailer.createTransport({
   secure: true,
   auth: {
     user: 'javierhursino@gmail.com',
-    pass: 'vrrh pefi imgf zfdb'
+    pass: "[REDACTED]"
   }
 });
 
@@ -201,9 +198,7 @@ const sendNotificationEmail = async (contributor, event, community) => {
   }
 };
 
-/**
- * Función principal
- */
+
 const main = async () => {
   console.log('=== FORZAR ENVÍO DE NOTIFICACIONES ===');
   console.log('Fecha actual:', new Date().toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' }));

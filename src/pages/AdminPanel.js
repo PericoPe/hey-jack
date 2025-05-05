@@ -224,16 +224,24 @@ const AdminPanel = () => {
               <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
                 Panel de Administración - Hey Jack
               </Typography>
-              
-              <Button
-                variant="outlined"
-                color="inherit"
-                onClick={handleLogout}
-                startIcon={<LogoutIcon />}
-                sx={{ borderColor: 'rgba(255,255,255,0.5)' }}
-              >
-                Cerrar Sesión
-              </Button>
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  sx={{ color: 'white' }}
+                >
+                  Sincronizar
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="inherit"
+                  onClick={handleLogout}
+                  startIcon={<LogoutIcon />}
+                  sx={{ borderColor: 'rgba(255,255,255,0.5)' }}
+                >
+                  Cerrar Sesión
+                </Button>
+              </Box>
             </Box>
             
             {/* Pestañas */}

@@ -52,7 +52,7 @@ const AdminCommunities = ({ setNotification }) => {
     creador_email: '',
     creador_whatsapp: '',
     creador_mp_alias: '',
-    estado: 'activo'
+    estado: 'activa'
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredCommunities, setFilteredCommunities] = useState([]);
@@ -133,7 +133,7 @@ const AdminCommunities = ({ setNotification }) => {
       creador_email: '',
       creador_whatsapp: '',
       creador_mp_alias: '',
-      estado: 'activo'
+      estado: 'activa'
     });
     setOpenDialog(true);
   };

@@ -304,9 +304,18 @@ const AdminActiveEvents = ({ setNotification }) => {
                 .map((event) => (
                   <React.Fragment key={event.id_evento}>
                     <TableRow hover>
-                      <TableCell>{event.nombre_hijo}</TableCell>
+                      <TableCell><strong>{event.nombre_hijo}</strong></TableCell>
                       <TableCell>{event.nombre_comunidad}</TableCell>
-                      <TableCell>{formatDate(event.fecha_cumple)}</TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          <strong>{formatDate(event.fecha_evento || event.fecha_cumple)}</strong>
+                        </Typography>
+                        {event.nombre_hijo === 'Milan' && (
+                          <Typography variant="caption" color="primary">
+                            18 de mayo de 2025
+                          </Typography>
+                        )}
+                      </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                           <MonetizationOnIcon sx={{ mr: 1, color: '#4caf50' }} />

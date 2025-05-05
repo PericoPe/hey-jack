@@ -66,7 +66,6 @@ const AdminPanel = () => {
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
 
@@ -94,19 +93,13 @@ const AdminPanel = () => {
     
     try {
       if (email.toLowerCase() === 'javierhursino@gmail.com') {
-        // En un entorno real, aquí verificaríamos la contraseña con un sistema seguro
-        // Para este ejemplo, simplemente verificamos que haya ingresado algo
-        if (password.length > 0) {
-          localStorage.setItem('adminEmail', email.toLowerCase());
-          setAuthorized(true);
-          setNotification({
-            open: true,
-            message: '¡Bienvenido al Panel de Administración!',
-            severity: 'success'
-          });
-        } else {
-          setError('Por favor, ingresa una contraseña');
-        }
+        localStorage.setItem('adminEmail', email.toLowerCase());
+        setAuthorized(true);
+        setNotification({
+          open: true,
+          message: '¡Bienvenido al Panel de Administración!',
+          severity: 'success'
+        });
       } else {
         setError('Email no autorizado para acceder al panel de administración');
       }
@@ -123,7 +116,6 @@ const AdminPanel = () => {
     localStorage.removeItem('adminEmail');
     setAuthorized(false);
     setEmail('');
-    setPassword('');
     setNotification({
       open: true,
       message: 'Has cerrado sesión correctamente',
@@ -181,16 +173,7 @@ const AdminPanel = () => {
                 required
               />
               
-              <TextField
-                label="Contraseña"
-                type="password"
-                fullWidth
-                margin="normal"
-                variant="outlined"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+
               
               <Button
                 type="submit"

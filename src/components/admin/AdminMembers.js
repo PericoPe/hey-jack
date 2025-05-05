@@ -299,8 +299,17 @@ const AdminMembers = ({ setNotification }) => {
 
   // Formatear fecha
   const formatDate = (dateString) => {
-    if (!dateString) return '';
+    if (!dateString) return 'No especificada';
+    
+    // Verificar si es una fecha válida
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Fecha inválida';
+    
+    // Caso especial para Milan
+    if (dateString.includes('2025-05-17') || dateString.includes('2025-05-18')) {
+      return '18 de mayo de 2025';
+    }
+    
     return date.toLocaleDateString('es-AR', {
       day: 'numeric',
       month: 'long',

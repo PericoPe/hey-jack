@@ -16,6 +16,10 @@
 .env.test.local
 .env.production.local
 
+# Ignorar scripts de corrección de base de datos
+fix_database.bat
+fix_database.js
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

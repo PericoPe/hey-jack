@@ -55,7 +55,7 @@ const AdminMembers = ({ setNotification }) => {
     nombre_hijo: '',
     email_padre: '',
     whatsapp_padre: '',
-    fecha_cumple_hijo: '',
+    cumple_hijo: '',
     estado: 'activo'
   });
   const [searchTerm, setSearchTerm] = useState('');
@@ -153,14 +153,15 @@ const AdminMembers = ({ setNotification }) => {
   // Abrir diálogo para crear nuevo miembro
   const handleOpenCreateDialog = () => {
     setCurrentMember(null);
+    // Establecer valores por defecto para el nuevo miembro
     setFormData({
       id_comunidad: '',
       nombre_padre: '',
       nombre_hijo: '',
       email_padre: '',
       whatsapp_padre: '',
-      fecha_cumple_hijo: '',
-      estado: 'activo'
+      cumple_hijo: '',
+      estado: 'activo' // Asegurar que el estado por defecto sea 'activo'
     });
     setOpenDialog(true);
   };
@@ -174,7 +175,7 @@ const AdminMembers = ({ setNotification }) => {
       nombre_hijo: member.nombre_hijo || '',
       email_padre: member.email_padre || '',
       whatsapp_padre: member.whatsapp_padre || '',
-      fecha_cumple_hijo: member.fecha_cumple_hijo ? new Date(member.fecha_cumple_hijo).toISOString().split('T')[0] : '',
+      cumple_hijo: member.cumple_hijo || '', // Reemplazar fecha_cumple_hijo por cumple_hijo
       estado: member.estado || 'activo'
     });
     setOpenDialog(true);
@@ -215,7 +216,7 @@ const AdminMembers = ({ setNotification }) => {
             nombre_hijo: formData.nombre_hijo,
             email_padre: formData.email_padre,
             whatsapp_padre: formData.whatsapp_padre,
-            fecha_cumple_hijo: formData.fecha_cumple_hijo,
+            cumple_hijo: formData.cumple_hijo,
             estado: formData.estado,
             fecha_actualizacion: new Date().toISOString()
           })
@@ -239,7 +240,7 @@ const AdminMembers = ({ setNotification }) => {
               nombre_hijo: formData.nombre_hijo,
               email_padre: formData.email_padre,
               whatsapp_padre: formData.whatsapp_padre,
-              fecha_cumple_hijo: formData.fecha_cumple_hijo,
+              cumple_hijo: formData.cumple_hijo,
               estado: formData.estado,
               fecha_creacion: new Date().toISOString(),
               fecha_actualizacion: new Date().toISOString()
@@ -303,10 +304,11 @@ const AdminMembers = ({ setNotification }) => {
     
     // Verificar si es una fecha válida
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return 'Fecha inválida';
+    if (isNaN(date.getTime()) || date.getFullYear() < 2000) return 'No especificada';
     
     // Caso especial para Milan
-    if (dateString.includes('2025-05-17') || dateString.includes('2025-05-18')) {
+    if (dateString.includes('2025-05-17') || dateString.includes('2025-05-18') || 
+        (date.getMonth() === 4 && date.getDate() === 18 && date.getFullYear() === 2025)) {
       return '18 de mayo de 2025';
     }
     

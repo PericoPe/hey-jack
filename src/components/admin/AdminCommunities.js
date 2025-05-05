@@ -148,7 +148,7 @@ const AdminCommunities = ({ setNotification }) => {
       creador_email: community.creador_email || '',
       creador_whatsapp: community.creador_whatsapp || '',
       creador_mp_alias: community.creador_mp_alias || '',
-      estado: community.estado || 'activo'
+      estado: community.estado || 'activa' // Corregido a 'activa' en lugar de 'activo'
     });
     setOpenDialog(true);
   };

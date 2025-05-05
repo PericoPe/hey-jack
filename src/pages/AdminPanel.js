@@ -21,9 +21,7 @@ import GroupWorkIcon from '@mui/icons-material/GroupWork';
 import EventIcon from '@mui/icons-material/Event';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import SyncIcon from '@mui/icons-material/Sync';
 import LogoutIcon from '@mui/icons-material/Logout';
-import BugReportIcon from '@mui/icons-material/BugReport';
 
 // Importaciones con carga diferida para mejorar el rendimiento inicial
 const AdminDashboard = lazy(() => import('../components/admin/AdminDashboard'));
@@ -293,18 +291,6 @@ const AdminPanel = () => {
                     iconPosition="start"
                     sx={{ flexDirection: 'row', alignItems: 'center' }}
                   />
-                  <Tab 
-                    icon={<SyncIcon />} 
-                    label="Sincronización" 
-                    iconPosition="start"
-                    sx={{ flexDirection: 'row', alignItems: 'center' }}
-                  />
-                  <Tab 
-                    icon={<BugReportIcon />} 
-                    label="Diagnóstico" 
-                    iconPosition="start"
-                    sx={{ flexDirection: 'row', alignItems: 'center' }}
-                  />
                 </Tabs>
                 
                 <TabPanel value={tabValue} index={0}>
@@ -331,13 +317,7 @@ const AdminPanel = () => {
                   <AdminNotificationTools setNotification={setNotification} />
                 </TabPanel>
                 
-                <TabPanel value={tabValue} index={6}>
-                  <AdminSyncTools setNotification={setNotification} />
-                </TabPanel>
-                
-                <TabPanel value={tabValue} index={7}>
-                  <AdminDiagnostic setNotification={setNotification} />
-                </TabPanel>
+
               </Box>
             )}
           </Box>

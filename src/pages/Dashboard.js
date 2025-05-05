@@ -37,28 +37,22 @@ const Dashboard = () => {
   // Estado para almacenar los datos del dashboard
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [data, setData] = useState({
-    community: null,
-    members: [],
-    activeEvents: [],
-    upcomingBirthdays: []
-  });
-  
+  const [dashboards, setDashboards] = useState([]);
+
   // Obtener datos al cargar el componente
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Leer communityId y userEmail de localStorage
-        const communityId = localStorage.getItem('communityId');
+        // Leer userEmail de localStorage
         const userEmail = localStorage.getItem('userEmail');
-        if (!communityId) {
-          setError('No se encontró la comunidad del usuario. Por favor, inicia sesión nuevamente.');
+        if (!userEmail) {
+          setError('No se encontró el email del usuario. Por favor, inicia sesión nuevamente.');
           setLoading(false);
           return;
         }
-        const dashboardData = await getDashboardData(communityId);
-        setData(dashboardData);
+        const dashboardsData = await getDashboardData(userEmail);
+        setDashboards(dashboardsData);
       } catch (err) {
         console.error('Error al cargar datos del dashboard:', err);
         setError('No se pudieron cargar los datos. Por favor, intenta de nuevo más tarde.');
@@ -66,7 +60,6 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
-    
     fetchData();
   }, []);
   
@@ -107,11 +100,16 @@ const Dashboard = () => {
     );
   }
   
-  // Datos de la comunidad
-  const { community, members, activeEvents, upcomingBirthdays } = data;
-  
-  // Evento activo principal (el primero si hay varios)
-  const mainEvent = activeEvents && activeEvents.length > 0 ? activeEvents[0] : null;
+  // Renderizado de múltiples comunidades
+  if (dashboards.length === 0) {
+    return (
+      <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f9ff', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <Box sx={{ textAlign: 'center', maxWidth: 500 }}>
+          <Typography variant="h6" color="text.secondary">No perteneces a ninguna comunidad todavía.</Typography>
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f9ff' }}>
@@ -141,93 +139,28 @@ const Dashboard = () => {
         <Typography variant="h4" component="h2" gutterBottom fontWeight="bold">
           Dashboard
         </Typography>
-        
         <Typography variant="body1" color="text.secondary" paragraph>
-          Bienvenido al dashboard de tu comunidad. Aquí puedes ver el estado de la colecta y gestionar los participantes.
+          Bienvenido al dashboard. Aquí puedes ver el estado de todas tus comunidades y gestionar los participantes.
         </Typography>
-
-        {/* Community Info */}
-        <Paper sx={{ p: 3, mb: 4, borderRadius: 2 }}>
-          <Typography variant="h5" gutterBottom>
-            {community?.nombre_comunidad || 'Mi Comunidad'}
-            {community?.institucion && ` - ${community.institucion}`}
-            {community?.grado && ` - ${community.grado}°`}
-            {community?.division && ` "${community.division}"`}
-          </Typography>
-          
-          <Grid container spacing={3} sx={{ mt: 1 }}>
-            <Grid item xs={12} md={4}>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Avatar sx={{ bgcolor: 'primary.main', mr: 2 }}>
-                  <PeopleIcon />
-                </Avatar>
-                <Box>
-                  <Typography variant="body2" color="text.secondary">
-                    Miembros
-                  </Typography>
-                  <Typography variant="h6">
-                    {members.length}
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
-            
-            <Grid item xs={12} md={4}>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Avatar sx={{ bgcolor: 'secondary.main', mr: 2 }}>
-                  <MonetizationOnIcon />
-                </Avatar>
-                <Box>
-                  <Typography variant="body2" color="text.secondary">
-                    Aporte por persona
-                  </Typography>
-                  <Typography variant="h6">
-                    ${community?.monto_individual || 0}
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
-            
-            <Grid item xs={12} md={4}>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Avatar sx={{ bgcolor: 'success.main', mr: 2 }}>
-                  <CakeIcon />
-                </Avatar>
-                <Box>
-                  <Typography variant="body2" color="text.secondary">
-                    Próximos cumpleaños
-                  </Typography>
-                  <Typography variant="h6">
-                    {upcomingBirthdays.length}
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
-          </Grid>
-          
-          {mainEvent && (
-            <Box sx={{ mt: 3 }}>
-              <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                Evento activo: Cumpleaños de {mainEvent.nombre_hijo} ({formatDate(mainEvent.fecha_evento)})
+        {dashboards.map((data, idx) => {
+          const { community, members, activeEvents, upcomingBirthdays } = data;
+          return (
+            <Paper key={community?.id_comunidad || idx} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
+              <Typography variant="h5" gutterBottom>
+                {community?.nombre_comunidad || 'Mi Comunidad'}
+                {community?.institucion && ` - ${community.institucion}`}
+                {community?.grado && ` - ${community.grado}°`}
+                {community?.division && ` "${community.division}"`}
               </Typography>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2">Progreso de la colecta</Typography>
-                <Typography variant="body2" fontWeight="bold">
-                  ${mainEvent.totalAmount || 0} / ${mainEvent.monto_objetivo || 0} ({mainEvent.progress || 0}%)
-                </Typography>
-              </Box>
-              <LinearProgress 
-                variant="determinate" 
-                value={mainEvent.progress || 0} 
-                sx={{ height: 10, borderRadius: 5 }}
-              />
-            </Box>
-          )}
-        </Paper>
-
-        {/* Main Content Grid */}
-        <Grid container spacing={4}>
-          {/* Active Event Contributors */}
+              <Grid container spacing={3} sx={{ mt: 1 }}>
+                <Grid item xs={12} md={4}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Avatar sx={{ bgcolor: 'primary.main', mr: 2 }}>
+                      <PeopleIcon />
+                    </Avatar>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">
+                        Miembros
           <Grid item xs={12} md={8}>
             <Card sx={{ borderRadius: 2, mb: 4 }}>
               <CardContent>
@@ -236,89 +169,95 @@ const Dashboard = () => {
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
                 
-                {mainEvent ? (
-                  <List sx={{ maxHeight: 400, overflow: 'auto' }}>
-                    {mainEvent.contributors && mainEvent.contributors.length > 0 ? (
-                      mainEvent.contributors.map((contributor) => (
-                        <ListItem 
-                          key={contributor.id}
-                          secondaryAction={
-                            <Chip 
-                              icon={contributor.estado_pago === 'pagado' ? <CheckCircleIcon /> : <PendingIcon />}
-                              label={contributor.estado_pago === 'pagado' ? 'Pagado' : 'Pendiente'}
-                              color={contributor.estado_pago === 'pagado' ? 'success' : 'default'}
-                              size="small"
-                            />
-                          }
-                          sx={{
-                            mb: 1,
-                            borderRadius: 1,
-                            backgroundColor: contributor.estado_pago === 'pagado' ? 'rgba(76, 175, 80, 0.08)' : 'transparent'
-                          }}
-                        >
-                          <ListItemAvatar>
-                            <Avatar>
-                              <PersonIcon />
-                            </Avatar>
-                          </ListItemAvatar>
-                          <ListItemText 
-                            primary={contributor.nombre_padre || 'Aportante'} 
-                            secondary={
-                              <>
-                                {contributor.estado_pago === 'pagado' 
-                                  ? `$${contributor.monto_pagado || 0} · ${formatDate(contributor.fecha_pago)}` 
-                                  : `Aporte pendiente: $${contributor.monto_individual || 0}`
-                                }
-                                <Box sx={{ mt: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                  <Chip 
-                                    icon={<EmailIcon fontSize="small" />} 
-                                    label={contributor.notificacion_email ? 'Notificado' : 'Pendiente'} 
-                                    color={contributor.notificacion_email ? 'info' : 'default'}
-                                    size="small"
-                                    variant="outlined"
-                                  />
-                                  <Chip 
-                                    icon={<WhatsAppIcon fontSize="small" />} 
-                                    label={contributor.notificacion_whatsapp ? 'Notificado' : 'Pendiente'} 
-                                    color={contributor.notificacion_whatsapp ? 'success' : 'default'}
-                                    size="small"
-                                    variant="outlined"
-                                  />
-                                </Box>
-                              </>
-                            }
-                          />
-                        </ListItem>
-                      ))
-                    ) : (
-                      <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
-                        No hay aportantes registrados para este evento.
+
+                      <Typography variant="h6">
+                        {members.length}
                       </Typography>
-                    )}
-                  </List>
+                    </Box>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Avatar sx={{ bgcolor: 'secondary.main', mr: 2 }}>
+                      <MonetizationOnIcon />
+                    </Avatar>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">
+                        Aporte por persona
+                      </Typography>
+                      <Typography variant="h6">
+                        ${community?.monto_individual || 0}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Avatar sx={{ bgcolor: 'success.main', mr: 2 }}>
+                      <CakeIcon />
+                    </Avatar>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">
+                        Próximos cumpleaños
+                      </Typography>
+                      <Typography variant="h6">
+                        {upcomingBirthdays.length}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Grid>
+              </Grid>
+              <List sx={{ maxHeight: 300, overflow: 'auto' }}>
+                {members.length > 0 ? (
+                  members.map((member, index) => (
+                    <ListItem 
+                      key={index}
+                      sx={{
+                        mb: 1,
+                        borderRadius: 1
+                      }}
+                    >
+                      <ListItemAvatar>
+                        <Avatar>
+                          <PersonIcon />
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText 
+                        primary={member.nombre_padre} 
+                        secondary={
+                          <>
+                            <Typography variant="body2" component="span">
+                              Hijo/a: {member.nombre_hijo}
+                            </Typography>
+                            {member.cumple_hijo && (
+                              <Typography variant="body2" component="div">
+                                Cumpleaños: {formatDate(member.cumple_hijo)}
+                              </Typography>
+                            )}
+                            {member.email_padre && (
+                              <Typography variant="body2" component="div" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <EmailIcon fontSize="small" color="action" /> {member.email_padre}
+                              </Typography>
+                            )}
+                            {member.whatsapp_padre && (
+                              <Typography variant="body2" component="div" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <WhatsAppIcon fontSize="small" color="success" /> {member.whatsapp_padre}
+                              </Typography>
+                            )}
+                          </>
+                        }
+                      />
+                    </ListItem>
+                  ))
                 ) : (
                   <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
-                    No hay eventos activos en este momento.
+                    No hay miembros registrados en esta comunidad.
                   </Typography>
                 )}
-              </CardContent>
-            </Card>
-            
-            {/* Community Members */}
-            <Card sx={{ borderRadius: 2 }}>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Miembros de la comunidad
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-                
-                <List sx={{ maxHeight: 300, overflow: 'auto' }}>
-                  {members.length > 0 ? (
-                    members.map((member, index) => (
-                      <ListItem 
-                        key={index}
-                        sx={{
-                          mb: 1,
+              </List>
+            </Paper>
+          );
+        })}
                           borderRadius: 1
                         }}
                       >

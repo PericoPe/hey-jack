@@ -81,7 +81,15 @@ const AdminCommunities = ({ setNotification }) => {
       
       if (error) throw error;
       
-      setCommunities(data || []);
+      // Convertir fechas a formato legible y objeto Date
+      const communitiesWithFormattedDates = (data || []).map(com => ({
+        ...com,
+        fecha_creacion: com.fecha_creacion ? new Date(com.fecha_creacion) : null
+      }));
+      communitiesWithFormattedDates.forEach(c => {
+        if (!c.fecha_creacion) console.warn('Falta fecha_creacion en comunidad:', c);
+      });
+      setCommunities(communitiesWithFormattedDates);
     } catch (error) {
       console.error('Error al obtener comunidades:', error);
       setError('No se pudieron cargar las comunidades. Por favor, intenta de nuevo.');

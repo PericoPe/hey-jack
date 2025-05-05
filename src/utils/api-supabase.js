@@ -31,6 +31,7 @@ export const createCommunity = async (communityData) => {
       monto_individual: communityData.contributionAmount
     });
     
+    // Crear comunidad y esperar a que se confirme la creación
     const { data: community, error: communityError } = await supabase
       .from('comunidades')
       .insert([
@@ -48,17 +49,20 @@ export const createCommunity = async (communityData) => {
           monto_individual: communityData.contributionAmount
         }
       ])
-      .select();
-      
-    if (community) {
-      console.log('Comunidad creada exitosamente:', community);
+      .select()
+      .single(); // Asegura que obtienes el objeto creado
+
+    if (communityError || !community) {
+      console.error('Error al crear comunidad:', communityError);
+      throw communityError || new Error('No se pudo crear la comunidad');
     }
-    
-    if (communityError) throw communityError;
-    
-    // Insertar al creador como primer miembro
+
+    // Usa el id_comunidad real retornado por Supabase
+    const idComunidadReal = community.id_comunidad;
+
+    // Insertar al creador como primer miembro SOLO si la comunidad fue creada
     console.log('Intentando registrar miembro creador con datos:', {
-      id_comunidad,
+      id_comunidad: idComunidadReal,
       id_nombre_padre: communityData.parentName,
       nombre_padre: communityData.parentName,
       whatsapp_padre: communityData.whatsapp,
@@ -69,12 +73,12 @@ export const createCommunity = async (communityData) => {
       perfil: 'creador',
       monto_individual: communityData.contributionAmount
     });
-    
+
     const { data: member, error: memberError } = await supabase
       .from('miembros')
       .insert([
         {
-          id_comunidad: id_comunidad,
+          id_comunidad: idComunidadReal,
           id_nombre_padre: communityData.parentName,
           nombre_padre: communityData.parentName,
           whatsapp_padre: communityData.whatsapp,
@@ -87,15 +91,14 @@ export const createCommunity = async (communityData) => {
         }
       ])
       .select();
-      
+
+    if (memberError) throw memberError;
     if (member) {
       console.log('Miembro creador registrado exitosamente:', member);
     }
-    
-    if (memberError) throw memberError;
-    
+
     // Crear evento para el cumpleaños
-    await createBirthdayEvent(communityData.childName, communityData.childBirthdate, id_comunidad);
+    await createBirthdayEvent(communityData.childName, communityData.childBirthdate, idComunidadReal);
     
     return {
       success: true,

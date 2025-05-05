@@ -87,7 +87,17 @@ const AdminMembers = ({ setNotification }) => {
       
       if (error) throw error;
       
-      setMembers(data || []);
+      // Convertir fechas a formato legible y objeto Date
+      const membersWithFormattedDates = (data || []).map(member => ({
+        ...member,
+        cumple_hijo: member.cumple_hijo ? new Date(member.cumple_hijo) : null,
+        fecha_creacion: member.fecha_creacion ? new Date(member.fecha_creacion) : null
+      }));
+      membersWithFormattedDates.forEach(m => {
+        if (!m.cumple_hijo) console.warn('Falta cumple_hijo en miembro:', m);
+        if (!m.fecha_creacion) console.warn('Falta fecha_creacion en miembro:', m);
+      });
+      setMembers(membersWithFormattedDates);
     } catch (error) {
       console.error('Error al obtener miembros:', error);
       setError('No se pudieron cargar los miembros. Por favor, intenta de nuevo.');

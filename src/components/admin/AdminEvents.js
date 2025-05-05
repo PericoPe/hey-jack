@@ -84,7 +84,19 @@ const AdminEvents = ({ setNotification }) => {
       
       if (error) throw error;
       
-      setEvents(data || []);
+      // Convertir fechas a formato legible y objeto Date
+      const eventsWithFormattedDates = (data || []).map(event => ({
+        ...event,
+        fecha_creacion: event.fecha_creacion ? new Date(event.fecha_creacion) : null,
+        fecha_evento: event.fecha_evento ? new Date(event.fecha_evento) : null,
+        fecha_cumple: event.fecha_cumple ? new Date(event.fecha_cumple) : null
+      }));
+      eventsWithFormattedDates.forEach(ev => {
+        if (!ev.fecha_creacion) console.warn('Falta fecha_creacion en evento:', ev);
+        if (!ev.fecha_evento) console.warn('Falta fecha_evento en evento:', ev);
+        if (!ev.fecha_cumple) console.warn('Falta fecha_cumple en evento:', ev);
+      });
+      setEvents(eventsWithFormattedDates);
     } catch (error) {
       console.error('Error al obtener eventos:', error);
       setError('No se pudieron cargar los eventos. Por favor, intenta de nuevo.');

@@ -78,7 +78,9 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/" element={<LandingPage />} />
           <Route path="/crear" element={<CreateCommunity />} />
+          <Route path="/crear-comunidad" element={<CreateCommunity />} />
           <Route path="/unirse" element={<JoinCommunity />} />
+          <Route path="/unirse-comunidad" element={<JoinCommunity />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/hey-jackadmin" element={<AdminPanel />} />

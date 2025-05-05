@@ -72,7 +72,22 @@ const AdminActiveEvents = ({ setNotification }) => {
       
       if (error) throw error;
       
-      setActiveEvents(data || []);
+      // Convertir fechas a formato legible y objeto Date
+      const eventsWithFormattedDates = (data || []).map(event => ({
+        ...event,
+        fecha_creacion: event.fecha_creacion ? new Date(event.fecha_creacion) : null,
+        fecha_evento: event.fecha_evento ? new Date(event.fecha_evento) : null
+      }));
+      // Advertir si falta algún campo de fecha
+      eventsWithFormattedDates.forEach(ev => {
+        if (!ev.fecha_creacion) {
+          console.warn('Falta fecha_creacion en evento:', ev);
+        }
+        if (!ev.fecha_evento) {
+          console.warn('Falta fecha_evento en evento:', ev);
+        }
+      });
+      setActiveEvents(eventsWithFormattedDates);
     } catch (error) {
       console.error('Error al obtener eventos activos:', error);
       setError('No se pudieron cargar los eventos activos. Por favor, intenta de nuevo.');

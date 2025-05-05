@@ -187,63 +187,78 @@ const getUpcomingBirthdays = async (communityId) => {
 };
 
 /**
- * Obtiene todos los datos necesarios para el dashboard
- * @param {string} communityId - ID de la comunidad
- * @returns {Promise<Object>} - Datos completos para el dashboard
+ * Obtiene todas las comunidades a las que pertenece un usuario
+ * @param {string} userEmail - Email del usuario
+ * @returns {Promise<Array>} - Lista de comunidades
  */
-const getDashboardData = async (communityId = '1') => {
+const getUserCommunities = async (userEmail) => {
   try {
-    // Obtener datos de la comunidad
-    const community = await getCommunityData(communityId);
-    if (!community) {
-      throw new Error('No se encontró la comunidad');
+    // Buscar todos los id_comunidad donde el usuario es miembro
+    const { data: memberRows, error: memberError } = await supabase
+      .from('miembros')
+      .select('id_comunidad')
+      .eq('email_padre', userEmail);
+    if (memberError) throw memberError;
+    if (!memberRows || memberRows.length === 0) return [];
+    const communityIds = memberRows.map(m => m.id_comunidad);
+    // Traer datos de todas las comunidades
+    const { data: communities, error: commError } = await supabase
+      .from('comunidades')
+      .select('*')
+      .in('id_comunidad', communityIds);
+    if (commError) throw commError;
+    return communities || [];
+  } catch (error) {
+    console.error('Error al obtener comunidades del usuario:', error);
+    return [];
+  }
+};
+
+/**
+ * Obtiene todos los datos necesarios para el dashboard de un usuario (varias comunidades)
+ * @param {string} userEmail - Email del usuario
+ * @returns {Promise<Array>} - Lista de dashboards por comunidad
+ */
+const getDashboardData = async (userEmail) => {
+  try {
+    // Obtener todas las comunidades del usuario
+    const communities = await getUserCommunities(userEmail);
+    if (!communities || communities.length === 0) {
+      return [];
     }
-    
-    // Obtener miembros de la comunidad
-    const members = await getCommunityMembers(communityId);
-    
-    // Obtener eventos activos
-    const activeEvents = await getActiveEvents(communityId);
-    
-    // Obtener aportantes para cada evento activo
-    const eventsWithContributors = await Promise.all(
-      activeEvents.map(async (event) => {
-        const contributors = await getEventContributors(event.id_evento);
-        
-        // Calcular progreso de la recaudación
-        const totalAmount = contributors
-          .filter(contributor => contributor.estado_pago === 'pagado')
-          .reduce((sum, contributor) => sum + (contributor.monto_pagado || 0), 0);
-        
-        const targetAmount = event.monto_objetivo || 0;
-        const progress = targetAmount > 0 ? Math.round((totalAmount / targetAmount) * 100) : 0;
-        
-        return {
-          ...event,
-          contributors,
-          totalAmount,
-          progress
-        };
-      })
-    );
-    
-    // Obtener próximos cumpleaños
-    const upcomingBirthdays = await getUpcomingBirthdays(communityId);
-    
-    return {
-      community,
-      members,
-      activeEvents: eventsWithContributors,
-      upcomingBirthdays
-    };
+    // Para cada comunidad, obtener los datos completos
+    const dashboards = await Promise.all(communities.map(async (community) => {
+      const communityId = community.id_comunidad;
+      const members = await getCommunityMembers(communityId);
+      const activeEvents = await getActiveEvents(communityId);
+      const eventsWithContributors = await Promise.all(
+        activeEvents.map(async (event) => {
+          const contributors = await getEventContributors(event.id_evento);
+          const totalAmount = contributors
+            .filter(contributor => contributor.estado_pago === 'pagado')
+            .reduce((sum, contributor) => sum + (contributor.monto_pagado || 0), 0);
+          const targetAmount = event.monto_objetivo || 0;
+          const progress = targetAmount > 0 ? Math.round((totalAmount / targetAmount) * 100) : 0;
+          return {
+            ...event,
+            contributors,
+            totalAmount,
+            progress
+          };
+        })
+      );
+      const upcomingBirthdays = await getUpcomingBirthdays(communityId);
+      return {
+        community,
+        members,
+        activeEvents: eventsWithContributors,
+        upcomingBirthdays
+      };
+    }));
+    return dashboards;
   } catch (error) {
     console.error('Error al obtener datos para el dashboard:', error);
-    return {
-      community: null,
-      members: [],
-      activeEvents: [],
-      upcomingBirthdays: []
-    };
+    return [];
   }
 };
 
@@ -253,5 +268,6 @@ export {
   getActiveEvents,
   getEventContributors,
   getUpcomingBirthdays,
-  getDashboardData
+  getDashboardData,
+  getUserCommunities
 };

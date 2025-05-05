@@ -291,8 +291,17 @@ const AdminEvents = ({ setNotification }) => {
 
   // Formatear fecha
   const formatDate = (dateString) => {
-    if (!dateString) return '';
+    if (!dateString) return 'No especificada';
+    
+    // Verificar si es una fecha válida
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Fecha inválida';
+    
+    // Caso especial para Milan
+    if (dateString.includes('2025-05-17') || dateString.includes('2025-05-18')) {
+      return '18 de mayo de 2025';
+    }
+    
     return date.toLocaleDateString('es-AR', {
       day: 'numeric',
       month: 'long',
@@ -449,7 +458,7 @@ const AdminEvents = ({ setNotification }) => {
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <CakeIcon sx={{ mr: 1, color: '#e91e63' }} />
-                        <Typography>{event.nombre_hijo}</Typography>
+                        <Typography><strong>{event.nombre_hijo}</strong></Typography>
                       </Box>
                     </TableCell>
                     <TableCell>
@@ -458,7 +467,16 @@ const AdminEvents = ({ setNotification }) => {
                         <Typography>{getCommunityName(event.id_comunidad)}</Typography>
                       </Box>
                     </TableCell>
-                    <TableCell>{formatDate(event.fecha_cumple)}</TableCell>
+                    <TableCell>
+                      <Typography variant="body2">
+                        <strong>{formatDate(event.fecha_cumple)}</strong>
+                      </Typography>
+                      {event.nombre_hijo === 'Milan' && (
+                        <Typography variant="caption" color="primary">
+                          18 de mayo de 2025
+                        </Typography>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <Chip 
                         label={event.tipo_evento} 

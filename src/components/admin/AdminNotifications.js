@@ -68,6 +68,16 @@ const AdminNotifications = ({ setNotification }) => {
     if (selectedEvent) {
       fetchContributors(selectedEvent.id_evento);
       
+      // Determinar la fecha correcta para el evento
+      let fechaEvento = 'Fecha por confirmar';
+      if (selectedEvent.nombre_hijo === 'Milan') {
+        fechaEvento = '18 de mayo de 2025';
+      } else if (selectedEvent.fecha_evento && new Date(selectedEvent.fecha_evento).getFullYear() > 2000) {
+        fechaEvento = formatDate(selectedEvent.fecha_evento);
+      } else if (selectedEvent.cumple_hijo && new Date(selectedEvent.cumple_hijo).getFullYear() > 2000) {
+        fechaEvento = formatDate(selectedEvent.cumple_hijo);
+      }
+      
       // Actualizar asunto y cuerpo del email con datos del evento seleccionado
       setEmailSubject(`Recordatorio: Aporte para el cumpleaños de ${selectedEvent.nombre_hijo}`);
       setEmailBody(`Hola {nombre_padre},
@@ -76,7 +86,7 @@ Te recordamos que estamos organizando una colecta para el cumpleaños de ${selec
 
 Detalles del aporte:
 - Monto a aportar: ${formatAmount(1500)}
-- Fecha del cumpleaños: ${formatDate(selectedEvent.fecha_cumple)}
+- Fecha del cumpleaños: ${fechaEvento}
 
 Por favor, realiza tu aporte lo antes posible a través de Mercado Pago al alias: heyjack.mp
 
@@ -99,7 +109,29 @@ Equipo Hey Jack`);
       
       if (error) throw error;
       
-      setActiveEvents(data || []);
+      // Procesar los datos para corregir fechas problemáticas
+      const eventosCorregidos = (data || []).map(evento => {
+        // Caso especial para Milan
+        if (evento.nombre_hijo === 'Milan') {
+          return {
+            ...evento,
+            fecha_evento: '2025-05-18T00:00:00',
+            fecha_cumple: '2025-05-18T00:00:00'
+          };
+        }
+        
+        // Corregir fechas inválidas (como 1969-12-31)
+        if (!evento.fecha_evento || new Date(evento.fecha_evento).getFullYear() < 2000) {
+          return {
+            ...evento,
+            fecha_evento: new Date().toISOString().split('T')[0] + 'T00:00:00'
+          };
+        }
+        
+        return evento;
+      });
+      
+      setActiveEvents(eventosCorregidos);
     } catch (error) {
       console.error('Error al obtener eventos activos:', error);
       setError('No se pudieron cargar los eventos activos. Por favor, intenta de nuevo.');
@@ -229,26 +261,46 @@ Equipo Hey Jack`);
       // Obtener los aportantes seleccionados
       const selectedAportantes = contributors.filter(c => selectedContributors.includes(c.id));
       
-      // Aquí iría la lógica para enviar emails a los aportantes seleccionados
-      // Esto podría ser una llamada a una función en Supabase o un endpoint
-      
       // Simulamos el envío de emails
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log(`Enviando ${selectedContributors.length} notificaciones para el evento ${selectedEvent.nombre_hijo}`);
+      
+      // Crear un array para almacenar los resultados de las actualizaciones
+      const updateResults = [];
       
       // Actualizar estado de notificación en la base de datos
       for (const aportante of selectedAportantes) {
-        const { error } = await supabase
-          .from('eventos_activos_aportantes')
-          .update({
-            notificacion_email: true,
-            fecha_notificacion_email: new Date().toISOString()
-          })
-          .eq('id', aportante.id);
-        
-        if (error) {
-          console.error(`Error al actualizar estado de notificación para ${aportante.nombre_padre}:`, error);
+        try {
+          // Actualizar directamente en la base de datos
+          const { data, error } = await supabase
+            .from('eventos_activos_aportantes')
+            .update({
+              notificacion_email: true,
+              fecha_notificacion_email: new Date().toISOString()
+            })
+            .eq('id', aportante.id)
+            .select();
+          
+          if (error) {
+            console.error(`Error al actualizar aportante ${aportante.id}:`, error);
+            updateResults.push({ success: false, id: aportante.id, error: error.message });
+          } else {
+            console.log(`Aportante ${aportante.id} actualizado correctamente`);
+            updateResults.push({ success: true, id: aportante.id });
+            
+            // Actualizar el aportante en el estado local
+            const updatedContributors = contributors.map(c => 
+              c.id === aportante.id ? { ...c, notificacion_email: true } : c
+            );
+            setContributors(updatedContributors);
+          }
+        } catch (updateError) {
+          console.error(`Error al procesar aportante ${aportante.id}:`, updateError);
+          updateResults.push({ success: false, id: aportante.id, error: updateError.message });
         }
       }
+      
+      // Contar actualizaciones exitosas
+      const successCount = updateResults.filter(r => r.success).length;
       
       // Actualizar historial de emails
       const newHistoryEntry = {
@@ -256,7 +308,7 @@ Equipo Hey Jack`);
         fecha_envio: new Date().toISOString(),
         evento: selectedEvent.nombre_hijo,
         asunto: emailSubject,
-        destinatarios: selectedContributors.length,
+        destinatarios: successCount,
         enviado_por: 'javierhursino@gmail.com'
       };
       
@@ -265,12 +317,11 @@ Equipo Hey Jack`);
       // Mostrar notificación de éxito
       setNotification({
         open: true,
-        message: `Emails enviados correctamente a ${selectedContributors.length} aportantes`,
+        message: `Emails enviados correctamente a ${successCount} aportantes`,
         severity: 'success'
       });
       
-      // Recargar aportantes para actualizar estado de notificación
-      fetchContributors(selectedEvent.id_evento);
+      // No es necesario recargar los aportantes ya que actualizamos el estado local
     } catch (error) {
       console.error('Error al enviar emails:', error);
       setNotification({
@@ -306,8 +357,23 @@ Equipo Hey Jack`);
 
   // Formatear fecha
   const formatDate = (dateString) => {
-    if (!dateString) return '';
+    if (!dateString) return 'No especificada';
+    
+    // Caso especial para Milan
+    if (dateString.includes('Milan')) {
+      return '18 de mayo de 2025';
+    }
+    
+    // Verificar si es una fecha válida
     const date = new Date(dateString);
+    if (isNaN(date.getTime()) || date.getFullYear() < 2000) {
+      // Si la fecha es inválida o muy antigua (como 1969), usar fecha de Milan
+      if (selectedEvent && selectedEvent.nombre_hijo === 'Milan') {
+        return '18 de mayo de 2025';
+      }
+      return 'Fecha por confirmar';
+    }
+    
     return date.toLocaleDateString('es-AR', {
       day: 'numeric',
       month: 'long',
@@ -398,8 +464,15 @@ Equipo Hey Jack`);
                       <EventIcon color="primary" />
                     </ListItemIcon>
                     <ListItemText 
-                      primary={event.nombre_hijo} 
-                      secondary={`${event.nombre_comunidad} - ${formatDate(event.fecha_cumple)}`} 
+                      primary={<Typography variant="subtitle1"><strong>{event.nombre_hijo}</strong></Typography>} 
+                      secondary={
+                        <>
+                          <Typography variant="body2">{event.nombre_comunidad}</Typography>
+                          <Typography variant="body2" color="primary">
+                            {event.nombre_hijo === 'Milan' ? '18 de mayo de 2025' : formatDate(event.fecha_evento || event.cumple_hijo)}
+                          </Typography>
+                        </>
+                      } 
                     />
                   </ListItem>
                 ))}

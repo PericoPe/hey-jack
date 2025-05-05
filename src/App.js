@@ -7,7 +7,7 @@ import CreateCommunity from './pages/CreateCommunity';
 import JoinCommunity from './pages/JoinCommunity';
 import Dashboard from './pages/Dashboard';
 import LoginPage from './pages/LoginPage';
-import AdminPanel from './pages/AdminPanel';
+// import AdminPanel from './pages/AdminPanel';
 
 // Create a custom theme for Hey Jack
 const theme = createTheme({
@@ -76,12 +76,12 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/crear-comunidad" element={<CreateCommunity />} />
-          <Route path="/unirse-comunidad" element={<JoinCommunity />} />
-          <Route path="/unirse-comunidad/:communityId" element={<JoinCommunity />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/crear" element={<CreateCommunity />} />
+          <Route path="/unirse" element={<JoinCommunity />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/hey-jackadmin" element={<AdminPanel />} />
+          {/* <Route path="/hey-jackadmin" element={<AdminPanel />} /> */}
         </Routes>
       </Router>
     </ThemeProvider>

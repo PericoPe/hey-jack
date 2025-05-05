@@ -21,9 +21,7 @@ import GroupWorkIcon from '@mui/icons-material/GroupWork';
 import EventIcon from '@mui/icons-material/Event';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import SyncIcon from '@mui/icons-material/Sync';
 import LogoutIcon from '@mui/icons-material/Logout';
-import BugReportIcon from '@mui/icons-material/BugReport';
 
 // Importaciones con carga diferida para mejorar el rendimiento inicial
 const AdminDashboard = lazy(() => import('../components/admin/AdminDashboard'));
@@ -66,7 +64,6 @@ const AdminPanel = () => {
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
 
@@ -94,19 +91,13 @@ const AdminPanel = () => {
     
     try {
       if (email.toLowerCase() === 'javierhursino@gmail.com') {
-        // En un entorno real, aquí verificaríamos la contraseña con un sistema seguro
-        // Para este ejemplo, simplemente verificamos que haya ingresado algo
-        if (password.length > 0) {
-          localStorage.setItem('adminEmail', email.toLowerCase());
-          setAuthorized(true);
-          setNotification({
-            open: true,
-            message: '¡Bienvenido al Panel de Administración!',
-            severity: 'success'
-          });
-        } else {
-          setError('Por favor, ingresa una contraseña');
-        }
+        localStorage.setItem('adminEmail', email.toLowerCase());
+        setAuthorized(true);
+        setNotification({
+          open: true,
+          message: '¡Bienvenido al Panel de Administración!',
+          severity: 'success'
+        });
       } else {
         setError('Email no autorizado para acceder al panel de administración');
       }
@@ -123,7 +114,6 @@ const AdminPanel = () => {
     localStorage.removeItem('adminEmail');
     setAuthorized(false);
     setEmail('');
-    setPassword('');
     setNotification({
       open: true,
       message: 'Has cerrado sesión correctamente',
@@ -181,16 +171,7 @@ const AdminPanel = () => {
                 required
               />
               
-              <TextField
-                label="Contraseña"
-                type="password"
-                fullWidth
-                margin="normal"
-                variant="outlined"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+
               
               <Button
                 type="submit"
@@ -310,18 +291,6 @@ const AdminPanel = () => {
                     iconPosition="start"
                     sx={{ flexDirection: 'row', alignItems: 'center' }}
                   />
-                  <Tab 
-                    icon={<SyncIcon />} 
-                    label="Sincronización" 
-                    iconPosition="start"
-                    sx={{ flexDirection: 'row', alignItems: 'center' }}
-                  />
-                  <Tab 
-                    icon={<BugReportIcon />} 
-                    label="Diagnóstico" 
-                    iconPosition="start"
-                    sx={{ flexDirection: 'row', alignItems: 'center' }}
-                  />
                 </Tabs>
                 
                 <TabPanel value={tabValue} index={0}>
@@ -348,13 +317,7 @@ const AdminPanel = () => {
                   <AdminNotificationTools setNotification={setNotification} />
                 </TabPanel>
                 
-                <TabPanel value={tabValue} index={6}>
-                  <AdminSyncTools setNotification={setNotification} />
-                </TabPanel>
-                
-                <TabPanel value={tabValue} index={7}>
-                  <AdminDiagnostic setNotification={setNotification} />
-                </TabPanel>
+
               </Box>
             )}
           </Box>

@@ -515,7 +515,10 @@ Enviado desde: +5491130963251`;
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>Eventos</Typography>
-              <Typography variant="h4">{stats.activeEvents} <Typography component="span" variant="body2">activos</Typography></Typography>
+              <Box sx={{ display: 'flex', alignItems: 'baseline' }}>
+                <Typography variant="h4" sx={{ mr: 1 }}>{stats.activeEvents}</Typography>
+                <Typography variant="body2">activos</Typography>
+              </Box>
               <Typography variant="body2" color="text.secondary">De un total de {stats.totalEvents} eventos</Typography>
             </CardContent>
           </Card>
@@ -533,7 +536,10 @@ Enviado desde: +5491130963251`;
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>Pagos</Typography>
-              <Typography variant="h4">{stats.completedPayments} <Typography component="span" variant="body2">completados</Typography></Typography>
+              <Box sx={{ display: 'flex', alignItems: 'baseline' }}>
+                <Typography variant="h4" sx={{ mr: 1 }}>{stats.completedPayments}</Typography>
+                <Typography variant="body2">completados</Typography>
+              </Box>
               <Typography variant="body2" color="text.secondary">{stats.pendingPayments} pagos pendientes</Typography>
             </CardContent>
           </Card>

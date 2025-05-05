@@ -36,7 +36,7 @@ const AdminDiagnostic = ({ setNotification }) => {
       
       // 1. Verificar la conexión a Supabase
       addLogMessage('info', '1. Verificando conexión a Supabase...');
-      const { data: connectionTest, error: connectionError } = await supabase.from('comunidades').select('count()', { count: 'exact' });
+      const { data: connectionTest, error: connectionError } = await supabase.from('comunidades').select('id_comunidad');
       
       if (connectionError) {
         addLogMessage('error', `Error de conexión a Supabase: ${connectionError.message}`);
@@ -50,12 +50,12 @@ const AdminDiagnostic = ({ setNotification }) => {
       
       for (const table of tables) {
         addLogMessage('info', `2. Verificando tabla ${table}...`);
-        const { data, error, count } = await supabase.from(table).select('count()', { count: 'exact' });
+        const { data, error } = await supabase.from(table).select('*');
         
         if (error) {
           addLogMessage('error', `Error al verificar tabla ${table}: ${error.message}`);
         } else {
-          addLogMessage('success', `Tabla ${table} accesible. Registros: ${count}`);
+          addLogMessage('success', `Tabla ${table} accesible. Registros: ${data ? data.length : 0}`);
         }
       }
       

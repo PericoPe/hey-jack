@@ -28,7 +28,8 @@ const testEmails = [
   { email: 'ursino.julieta@gmail.com', name: 'Julieta', communityId: '1' },
   { email: 'irene.candido@gmail.com', name: 'Irene', communityId: '1' },
   { email: 'piero.gildelvalle@gmail.com', name: 'Piero', communityId: '1' },
-  { email: 'javier@example.com', name: 'Javier', communityId: '1' }
+  { email: 'javier@example.com', name: 'Javier', communityId: '1' },
+  { email: 'javierhursino@gmail.com', name: 'Javier Hursino', communityId: 'admin' }
 ];
 
 const LoginPage = () => {
@@ -50,36 +51,59 @@ const LoginPage = () => {
     setLoading(true);
     setError('');
     
+    // Caso especial para javierhursino@gmail.com (administrador)
+    if (email.toLowerCase() === 'javierhursino@gmail.com') {
+      console.log('Usuario administrador detectado: javierhursino@gmail.com');
+      setSuccess(true);
+      // Guardar email en localStorage sin communityId para que se muestren todas las comunidades
+      localStorage.removeItem('communityId'); // Eliminar communityId para mostrar todas las comunidades
+      localStorage.setItem('userEmail', 'javierhursino@gmail.com');
+      // Redirigir al dashboard después de un breve retraso
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1500);
+      setLoading(false);
+      return;
+    }
+    
+    // Verificar si el email está en la lista de prueba
+    const testUser = testEmails.find(user => user.email.toLowerCase() === email.toLowerCase());
+    if (testUser) {
+      console.log('Usuario de prueba encontrado:', testUser);
+      setSuccess(true);
+      // Guardar communityId y email en localStorage para test user
+      localStorage.setItem('communityId', testUser.communityId || '1');
+      localStorage.setItem('userEmail', testUser.email);
+      // Redirigir al dashboard después de un breve retraso
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1500);
+      setLoading(false);
+      return;
+    }
+    
     try {
       // Verificar si el email existe en la base de datos
+      console.log('Verificando email en base de datos:', email);
       const { data, error: dbError } = await supabase
         .from('miembros')
         .select('id_comunidad, nombre_padre')
-        .eq('email_padre', email)
-        .single();
+        .eq('email_padre', email);
       
-      if (dbError) {
-        // Si no se encuentra en la base de datos, verificar en la lista de prueba
-        const testUser = testEmails.find(user => user.email.toLowerCase() === email.toLowerCase());
-        
-        if (testUser) {
-          setSuccess(true);
-          // Guardar communityId y email en localStorage para test user
-          localStorage.setItem('communityId', testUser.communityId || '1');
-          localStorage.setItem('userEmail', testUser.email);
-          // Redirigir al dashboard después de un breve retraso
-          setTimeout(() => {
-            navigate('/dashboard');
-          }, 1500);
-        } else {
-          setError('Email no encontrado. Por favor, verifica que sea correcto.');
-        }
+      if (dbError || !data || data.length === 0) {
+        console.error('Error o sin resultados al buscar email:', dbError);
+        setError('Email no encontrado. Por favor, verifica que sea correcto.');
       } else {
         // Email encontrado en la base de datos
+        console.log('Email encontrado en la base de datos:', data);
         setSuccess(true);
         // Guardar communityId y email en localStorage para usuario real
-        if (data && data.id_comunidad) {
-          localStorage.setItem('communityId', data.id_comunidad);
+        if (data && data.length > 0 && data[0].id_comunidad) {
+          localStorage.setItem('communityId', data[0].id_comunidad);
+          localStorage.setItem('userEmail', email);
+        } else {
+          // Si no hay communityId, solo guardar el email
+          localStorage.removeItem('communityId');
           localStorage.setItem('userEmail', email);
         }
         // Redirigir al dashboard después de un breve retraso

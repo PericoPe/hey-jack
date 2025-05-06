@@ -52,6 +52,7 @@ const JoinCommunity = () => {
   useEffect(() => {
     // Verificar si tenemos un ID de comunidad en la URL
     if (communityId) {
+      console.log('ID de comunidad detectado en URL:', communityId);
       // Decodificar el ID si es necesario
       const decodedId = decodeURIComponent(communityId);
       setCommunityCode(decodedId);
@@ -61,6 +62,19 @@ const JoinCommunity = () => {
       
       // Mostrar directamente el formulario para unirse
       setActiveStep(0);
+    } else {
+      // Verificar si hay un ID en la ruta completa (para compatibilidad con formatos antiguos)
+      const pathParts = location.pathname.split('/');
+      if (pathParts.length > 2) {
+        const potentialId = pathParts[pathParts.length - 1];
+        console.log('Potencial ID de comunidad extraído de la ruta:', potentialId);
+        
+        if (potentialId && potentialId !== 'unirse-comunidad') {
+          setCommunityCode(potentialId);
+          fetchCommunityDetails(potentialId);
+          setActiveStep(0);
+        }
+      }
     }
   }, [communityId, location.pathname]);
   
@@ -75,30 +89,71 @@ const JoinCommunity = () => {
       
       // Verificar si la respuesta es exitosa
       if (response.success) {
-        // Extraer las partes del ID (formato: INSTITUCION+SALAoGRADO+DIVISION+TIMESTAMP)
-        const parts = communityId.split('+');
+        let institution = '';
+        let gradeLevel = '';
+        let division = '';
         
-        if (parts.length >= 3) {
-          // Extraer y formatear los componentes del ID
-          const institution = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
-          const gradeLevel = parts[1].charAt(0).toUpperCase() + parts[1].slice(1);
-          const division = parts[2].charAt(0).toUpperCase() + parts[2].slice(1);
+        // Extraer información según el formato del ID
+        if (communityId.includes('+')) {
+          // Formato: INSTITUCION+SALAoGRADO+DIVISION+TIMESTAMP
+          const parts = communityId.split('+');
+          if (parts.length >= 3) {
+            institution = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+            gradeLevel = parts[1].charAt(0).toUpperCase() + parts[1].slice(1);
+            division = parts[2].charAt(0).toUpperCase() + parts[2].slice(1);
+          }
+        } else if (communityId.includes('_')) {
+          // Formato: institucionSalaXcolor_TIMESTAMP
+          const [namePart] = communityId.split('_');
           
-          // Configurar los detalles de la comunidad
-          const communityDetails = {
-            name: response.communityName || `${institution} - ${gradeLevel} - ${division}`,
-            institution: response.institution || institution,
-            gradeLevel: response.gradeLevel || gradeLevel,
-            division: response.division || division,
-            contributionAmount: response.contributionAmount || "1.500",
-            communityId: communityId,
-            status: response.status || 'activa',
-            members: response.memberCount || 1
-          };
-          
-          console.log('Comunidad encontrada:', communityDetails);
-          setCommunityDetails(communityDetails);
+          // Intentar extraer las partes del nombre
+          if (namePart.includes('sala')) {
+            // Formato: institucionSalaXcolor
+            const match = namePart.match(/([a-zA-Z]+)(sala\d+)([a-zA-Z]+)/);
+            if (match) {
+              institution = match[1].replace(/([A-Z])/g, ' $1').trim();
+              institution = institution.charAt(0).toUpperCase() + institution.slice(1);
+              
+              // Formatear sala y número
+              const salaNum = match[2].match(/sala(\d+)/);
+              gradeLevel = salaNum ? `Sala ${salaNum[1]}` : match[2];
+              
+              // Formatear color/división
+              division = match[3].charAt(0).toUpperCase() + match[3].slice(1);
+            }
+          } else {
+            // Otro formato: intentar dividir por camelCase
+            const parts = namePart.replace(/([A-Z])/g, ' $1').trim().split(' ');
+            if (parts.length >= 2) {
+              institution = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+              gradeLevel = parts.length > 1 ? parts[1] : '';
+              division = parts.length > 2 ? parts[2] : '';
+            }
+          }
         }
+        
+        // Si no se pudo extraer información, usar valores predeterminados
+        if (!institution && !gradeLevel && !division) {
+          institution = 'Institución';
+          gradeLevel = 'Grado/Sala';
+          division = 'División';
+        }
+        
+        // Configurar los detalles de la comunidad
+        const communityDetails = {
+          name: response.communityName || `${institution} - ${gradeLevel} - ${division}`,
+          institution: response.institution || institution,
+          gradeLevel: response.gradeLevel || gradeLevel,
+          division: response.division || division,
+          contributionAmount: response.contributionAmount || "1.500",
+          communityId: communityId,
+          status: response.status || 'activa',
+          members: response.memberCount || 1,
+          creatorName: response.creatorName || 'Javier Ursino'
+        };
+        
+        console.log('Comunidad encontrada:', communityDetails);
+        setCommunityDetails(communityDetails);
       } else {
         // Si no se encuentra la comunidad, mostrar un mensaje de error
         console.error('No se encontró la comunidad:', communityId);
@@ -227,21 +282,80 @@ const JoinCommunity = () => {
   const renderCommunityForm = () => {
     return (
       <Box>
-        <Typography variant="h5" gutterBottom>
+        <Typography variant="h4" fontWeight="bold" color="primary.main" gutterBottom>
           ¡Te han invitado a una comunidad!
         </Typography>
-        <Paper elevation={1} sx={{ p: 3, mb: 4, bgcolor: 'primary.light', color: 'primary.contrastText', borderRadius: 2 }}>
-          <Typography variant="body1" sx={{ fontWeight: 'medium', mb: 1 }}>
-            {communityDetails?.creatorName || 'Un organizador'} te está invitando a unirte a la comunidad
+        <Paper 
+          elevation={3} 
+          sx={{ 
+            p: 4, 
+            mb: 4, 
+            background: 'linear-gradient(135deg, #4e7df0 0%, #5e8df5 100%)', 
+            color: 'white', 
+            borderRadius: 3,
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+        >
+          <Box sx={{ 
+            position: 'absolute', 
+            top: 0, 
+            right: 0, 
+            width: '150px', 
+            height: '150px', 
+            background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%)',
+            borderRadius: '0 0 0 100%'
+          }} />
+          
+          <Typography variant="h6" sx={{ fontWeight: 'medium', mb: 1, display: 'flex', alignItems: 'center' }}>
+            <Avatar 
+              sx={{ mr: 1, bgcolor: 'white', color: 'primary.main' }}
+              alt={communityDetails?.creatorName || 'Javier'}
+              src="/static/images/avatar/1.jpg"
+            >
+              {(communityDetails?.creatorName || 'Javier').charAt(0)}
+            </Avatar>
+            <span><b>{communityDetails?.creatorName || 'Javier Ursino'}</b> te está invitando a unirte a:</span>
           </Typography>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+          
+          <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 3, mt: 2 }}>
             {communityDetails?.name || communityCode}
           </Typography>
-          <Typography variant="body2">
-            Institución: <b>{communityDetails?.institution}</b><br />
-            Sala/Grado: <b>{communityDetails?.gradeLevel}</b><br />
-            División: <b>{communityDetails?.division}</b>
-          </Typography>
+          
+          <Grid container spacing={2} sx={{ mt: 1 }}>
+            <Grid item xs={12} sm={4}>
+              <Box sx={{ bgcolor: 'rgba(255,255,255,0.15)', p: 2, borderRadius: 2 }}>
+                <Typography variant="subtitle2" sx={{ opacity: 0.9, mb: 1 }}>
+                  Institución
+                </Typography>
+                <Typography variant="h6" fontWeight="bold">
+                  {communityDetails?.institution || 'Sin especificar'}
+                </Typography>
+              </Box>
+            </Grid>
+            
+            <Grid item xs={12} sm={4}>
+              <Box sx={{ bgcolor: 'rgba(255,255,255,0.15)', p: 2, borderRadius: 2 }}>
+                <Typography variant="subtitle2" sx={{ opacity: 0.9, mb: 1 }}>
+                  Sala/Grado
+                </Typography>
+                <Typography variant="h6" fontWeight="bold">
+                  {communityDetails?.gradeLevel || 'Sin especificar'}
+                </Typography>
+              </Box>
+            </Grid>
+            
+            <Grid item xs={12} sm={4}>
+              <Box sx={{ bgcolor: 'rgba(255,255,255,0.15)', p: 2, borderRadius: 2 }}>
+                <Typography variant="subtitle2" sx={{ opacity: 0.9, mb: 1 }}>
+                  División
+                </Typography>
+                <Typography variant="h6" fontWeight="bold">
+                  {communityDetails?.division || 'Sin especificar'}
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
         </Paper>
         
         <Typography variant="body1" color="text.secondary" paragraph>

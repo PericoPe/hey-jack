@@ -76,37 +76,81 @@ export const joinCommunity = async (memberData) => {
  */
 export const getCommunityDetails = async (communityId) => {
   try {
-    // Si estamos usando datos simulados, generar datos aleatorios
-    if (USE_MOCK_DATA) {
-      // Extraer partes del ID (formato: institucion+grado+division+numero)
+    console.log('Obteniendo detalles para comunidad con ID:', communityId);
+    
+    // Verificar si el ID está en formato antiguo o nuevo
+    let institution, gradeLevel, division;
+    
+    // Formato con + (INSTITUCION+SALAoGRADO+DIVISION+TIMESTAMP)
+    if (communityId.includes('+')) {
       const parts = communityId.split('+');
-      const institution = parts[0] || 'Institución';
-      const gradeLevel = parts[1] || 'Grado';
-      const division = parts[2] || 'División';
+      if (parts.length >= 3) {
+        institution = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+        gradeLevel = parts[1].charAt(0).toUpperCase() + parts[1].slice(1);
+        division = parts[2].charAt(0).toUpperCase() + parts[2].slice(1);
+      }
+    } 
+    // Formato con _ (INSTITUCION+SALA+DIVISION_TIMESTAMP)
+    else if (communityId.includes('_')) {
+      const [namePart, timestamp] = communityId.split('_');
       
+      // Intentar extraer las partes del nombre
+      if (namePart.includes('sala')) {
+        // Formato: institucionSalaXcolor
+        const match = namePart.match(/([a-zA-Z]+)(sala\d+)([a-zA-Z]+)/);
+        if (match) {
+          institution = match[1].charAt(0).toUpperCase() + match[1].slice(1);
+          gradeLevel = match[2].charAt(0).toUpperCase() + match[2].slice(1);
+          division = match[3].charAt(0).toUpperCase() + match[3].slice(1);
+        }
+      } else {
+        // Otro formato: intentar dividir por camelCase
+        const parts = namePart.replace(/([A-Z])/g, ' $1').trim().split(' ');
+        if (parts.length >= 2) {
+          institution = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+          gradeLevel = parts.length > 1 ? parts[1] : '';
+          division = parts.length > 2 ? parts[2] : '';
+        }
+      }
+    }
+    
+    // Si estamos usando datos simulados, devolver datos simulados
+    if (USE_MOCK_DATA) {
+      console.log('Simulando obtención de detalles para comunidad:', communityId);
+      
+      if (institution && gradeLevel) {
+        return {
+          success: true,
+          communityName: `${institution} - ${gradeLevel}${division ? ` - ${division}` : ''}`,
+          institution: institution,
+          gradeLevel: gradeLevel,
+          division: division || '',
+          contributionAmount: "1.500",
+          status: 'activa',
+          memberCount: Math.floor(Math.random() * 20) + 5 // Entre 5 y 25 miembros
+        };
+      }
+      
+      // Fallback para cualquier formato de ID
       return {
         success: true,
-        data: {
-          id: communityId,
-          name: `${institution} ${gradeLevel} ${division}`,
-          creatorId: 'creador-simulado',
-          creatorName: 'Creador Simulado',
-          creatorEmail: 'creador@ejemplo.com',
-          creatorWhatsapp: '1122334455',
-          members: 1,
-          status: 'activa',
-          createdAt: new Date().toISOString()
-        }
+        communityName: `Comunidad ${communityId.substring(0, 10)}`,
+        institution: 'Institución',
+        gradeLevel: 'Grado',
+        division: 'División',
+        contributionAmount: "1.500",
+        status: 'activa',
+        memberCount: Math.floor(Math.random() * 20) + 5 // Entre 5 y 25 miembros
       };
     }
     
     // Usar Supabase para obtener detalles de la comunidad
     return await supabaseGetCommunityDetails(communityId);
   } catch (error) {
-    console.error('Error al obtener detalles de la comunidad:', error);
+    console.error('Error al obtener detalles de comunidad:', error);
     return {
       success: false,
-      message: 'Error al obtener detalles de la comunidad: ' + error.toString()
+      message: 'Error al obtener detalles de comunidad: ' + error.toString()
     };
   }
 };

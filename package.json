@@ -36,7 +36,10 @@
     "preview-email": "node src/scripts/run.js previewEmailTemplate",
     "force-notify": "node src/scripts/run.js forceNotify",
     "notificar": "node src/scripts/run.js forceNotify",
-    "actualizar-aportantes": "node src/scripts/update_contributors.js"
+    "actualizar-aportantes": "node src/scripts/update_contributors.js",
+    "notificar-milan": "node src/scripts/notificar_milan.js",
+    "notificar-todos-milan": "node src/scripts/notificar_todos_milan.js",
+    "notificar-milan-rapido": "node src/scripts/notificar_todos_milan_optimizado.js"
   },
   "eslintConfig": {
     "extends": [

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invitación a Colaborar - Hey Jack</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            margin: 10px 0 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px 25px;
+        }
+        
+        .event-details {
+            background-color: #f5f9ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-left: 4px solid #2575fc;
+        }
+        
+        .event-details h2 {
+            margin-top: 0;
+            color: #2575fc;
+            font-size: 20px;
+        }
+        
+        .event-details p {
+            margin: 8px 0;
+            font-size: 15px;
+        }
+        
+        .event-details .highlight {
+            font-weight: 600;
+            color: #6a11cb;
+        }
+        
+        .payment-section {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .payment-amount {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2575fc;
+            margin: 15px 0;
+        }
+        
+        .payment-button {
+            display: inline-block;
+            background-color: #009ee3;
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 16px;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .payment-button:hover {
+            background-color: #008dd0;
+            transform: translateY(-2px);
+        }
+        
+        .payment-button img {
+            height: 20px;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        
+        .community-info {
+            background-color: #f5f5f5;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 25px;
+        }
+        
+        .community-info h3 {
+            margin-top: 0;
+            color: #555;
+            font-size: 18px;
+        }
+        
+        .footer {
+            background-color: #f0f4f8;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .footer a {
+            color: #2575fc;
+            text-decoration: none;
+        }
+        
+        .divider {
+            height: 1px;
+            background-color: #eaeaea;
+            margin: 25px 0;
+        }
+        
+        @media only screen and (max-width: 600px) {
+            .container {
+                border-radius: 0;
+            }
+            
+            .header {
+                padding: 20px 15px;
+            }
+            
+            .content {
+                padding: 20px 15px;
+            }
+            
+            .payment-amount {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>¡Hey Jack! 🎉</h1>
+            <p>Plataforma de colaboración para regalos de cumpleaños</p>
+        </div>
+        
+        <div class="content">
+            <p>Hola <span class="highlight">{{nombre_padre}}</span>,</p>
+            
+            <p>Te escribimos para invitarte a participar en un regalo conjunto para el cumpleaños de <span class="highlight">{{nombre_hijo_cumpleañero}}</span>.</p>
+            
+            <div class="event-details">
+                <h2>Detalles del Evento</h2>
+                <p><strong>Niño/a:</strong> {{nombre_hijo_cumpleañero}}</p>
+                <p><strong>Fecha de cumpleaños:</strong> {{fecha_cumpleaños}}</p>
+                <p><strong>Días restantes:</strong> {{dias_restantes}}</p>
+                <p><strong>Comunidad:</strong> {{nombre_comunidad}}</p>
+                <p><strong>Organizado por:</strong> {{nombre_padre_organizador}}</p>
+            </div>
+            
+            <p>Entre todos los padres de la comunidad estamos organizando un regalo especial. Tu aporte ayudará a que este cumpleaños sea inolvidable.</p>
+            
+            <div class="payment-section">
+                <p>Tu aporte sugerido es:</p>
+                <div class="payment-amount">${{monto_aporte}}</div>
+                <a href="{{link_pago}}" class="payment-button">
+                    <img src="https://www.mercadopago.com/org-img/MP3/API/logos/mp-logo-sm.png" alt="Mercado Pago">
+                    Pagar con Mercado Pago
+                </a>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="community-info">
+                <h3>Sobre nuestra comunidad</h3>
+                <p><strong>Institución:</strong> {{institucion}}</p>
+                <p><strong>Grado:</strong> {{grado}}° {{division}}</p>
+                <p><strong>Miembros:</strong> {{cantidad_miembros}} familias</p>
+                <p><strong>Monto total a recaudar:</strong> ${{monto_objetivo}}</p>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <p>Si tienes alguna pregunta o necesitas ayuda, no dudes en contactar al organizador o responder a este correo.</p>
+            
+            <p>¡Gracias por tu colaboración!</p>
+            
+            <p>Saludos cordiales,<br>
+            <strong>Equipo Hey Jack</strong></p>
+        </div>
+        
+        <div class="footer">
+            <p>Este correo fue enviado a través de la plataforma <a href="https://heyjack.com.ar">Hey Jack</a>.</p>
+            <p>© 2025 Hey Jack - Todos los derechos reservados</p>
+        </div>
+    </div>
+</body>
+</html>

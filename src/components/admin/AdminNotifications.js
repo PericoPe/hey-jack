@@ -520,13 +520,15 @@ Equipo Hey Jack`);
                     <ListItem>
                       <ListItemIcon>
                         <Checkbox
+                          id="select-all-contributors-checkbox"
                           edge="start"
                           checked={selectedContributors.length === contributors.length}
                           indeterminate={selectedContributors.length > 0 && selectedContributors.length < contributors.length}
                           onChange={handleSelectAllContributors}
+                          inputProps={{ 'aria-labelledby': 'select-all-contributors-text' }}
                         />
                       </ListItemIcon>
-                      <ListItemText primary="Seleccionar Todos" />
+                      <ListItemText id="select-all-contributors-text" primary="Seleccionar Todos" />
                     </ListItem>
                     
                     <Divider />
@@ -535,12 +537,15 @@ Equipo Hey Jack`);
                       <ListItem key={contributor.id} divider>
                         <ListItemIcon>
                           <Checkbox
+                            id={`contributor-checkbox-${contributor.id}`}
                             edge="start"
                             checked={selectedContributors.indexOf(contributor.id) !== -1}
                             onChange={(event) => handleSelectContributor(event, contributor.id)}
+                            inputProps={{ 'aria-labelledby': `contributor-name-${contributor.id}` }}
                           />
                         </ListItemIcon>
                         <ListItemText 
+                          id={`contributor-name-${contributor.id}`}
                           primary={contributor.nombre_padre} 
                           secondary={
                             <React.Fragment>

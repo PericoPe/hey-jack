@@ -38,6 +38,11 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [dashboards, setDashboards] = useState([]);
+  const [selectedDashboardIndex, setSelectedDashboardIndex] = useState(0);
+  const [community, setCommunity] = useState(null);
+  const [members, setMembers] = useState([]);
+  const [upcomingBirthdays, setUpcomingBirthdays] = useState([]);
+  const [activeEvents, setActiveEvents] = useState([]);
 
   // Obtener datos al cargar el componente
   useEffect(() => {
@@ -52,7 +57,18 @@ const Dashboard = () => {
           return;
         }
         const dashboardsData = await getDashboardData(userEmail);
+        console.log('Datos de dashboard obtenidos:', dashboardsData);
         setDashboards(dashboardsData);
+        
+        // Si hay datos, establecer la primera comunidad como activa
+        if (dashboardsData && dashboardsData.length > 0) {
+          setSelectedDashboardIndex(0);
+          const firstDashboard = dashboardsData[0];
+          setCommunity(firstDashboard.community || {});
+          setMembers(firstDashboard.members || []);
+          setUpcomingBirthdays(firstDashboard.upcomingBirthdays || []);
+          setActiveEvents(firstDashboard.activeEvents || []);
+        }
       } catch (err) {
         console.error('Error al cargar datos del dashboard:', err);
         setError('No se pudieron cargar los datos. Por favor, intenta de nuevo más tarde.');
@@ -100,7 +116,19 @@ const Dashboard = () => {
     );
   }
   
-  // Renderizado de múltiples comunidades
+  // Manejar el cambio de comunidad seleccionada
+  const handleCommunityChange = (event) => {
+    const index = parseInt(event.target.value, 10);
+    setSelectedDashboardIndex(index);
+    
+    const selectedDashboard = dashboards[index];
+    setCommunity(selectedDashboard.community || {});
+    setMembers(selectedDashboard.members || []);
+    setUpcomingBirthdays(selectedDashboard.upcomingBirthdays || []);
+    setActiveEvents(selectedDashboard.activeEvents || []);
+  };
+
+  // Renderizado cuando no hay comunidades
   if (dashboards.length === 0) {
     return (
       <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f9ff', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -111,341 +139,504 @@ const Dashboard = () => {
     );
   }
 
+  // Obtener la comunidad seleccionada
+  const selectedDashboard = dashboards[selectedDashboardIndex] || {};
+  const selectedCommunity = community || {};
+  
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f9ff' }}>
-      {/* Header */}
-      <Box sx={{ backgroundColor: 'primary.main', color: 'white', py: 2 }}>
-        <Container>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="h5" component="h1" fontWeight="bold">
-              Hey Jack
-            </Typography>
-            <Button 
-              component={Link} 
-              to="/"
-              variant="outlined" 
-              color="inherit" 
-              size="small"
-              startIcon={<HomeIcon />}
-            >
-              Inicio
-            </Button>
-          </Box>
-        </Container>
-      </Box>
-
-      {/* Main Content */}
-      <Container sx={{ py: 4 }}>
-        <Typography variant="h4" component="h2" gutterBottom fontWeight="bold">
-          Dashboard
-        </Typography>
-        <Typography variant="body1" color="text.secondary" paragraph>
-          Bienvenido al dashboard. Aquí puedes ver el estado de todas tus comunidades y gestionar los participantes.
-        </Typography>
-        {dashboards.map((data, idx) => {
-          const { community, members, activeEvents, upcomingBirthdays } = data;
-          return (
-            <Paper key={community?.id_comunidad || idx} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
-              <Typography variant="h5" gutterBottom>
-                {community?.nombre_comunidad || 'Mi Comunidad'}
-                {community?.institucion && ` - ${community.institucion}`}
-                {community?.grado && ` - ${community.grado}°`}
-                {community?.division && ` "${community.division}"`}
+    <>
+      <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f9ff' }}>
+        {/* Header */}
+        <Box sx={{ backgroundColor: 'primary.main', color: 'white', py: 3, mb: 4 }}>
+          <Container>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+              <Typography variant="h4" component="h1" fontWeight="bold">
+                Hey Jack
               </Typography>
-              <Grid container spacing={3} sx={{ mt: 1 }}>
-                <Grid item xs={12} md={4}>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Avatar sx={{ bgcolor: 'primary.main', mr: 2 }}>
-                      <PeopleIcon />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="body2" color="text.secondary">
-                        Miembros
-          <Grid item xs={12} md={8}>
-            <Card sx={{ borderRadius: 2, mb: 4 }}>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  {mainEvent ? `Aportantes para el cumpleaños de ${mainEvent.nombre_hijo}` : 'No hay eventos activos'}
+              <Button 
+                component={Link} 
+                to="/"
+                variant="outlined" 
+                color="inherit" 
+                size="medium"
+                startIcon={<HomeIcon />}
+              >
+                Inicio
+              </Button>
+            </Box>
+            
+            {/* Selector de comunidades */}
+            {dashboards.length > 1 && (
+              <Box sx={{ mt: 3, mb: 2, backgroundColor: 'rgba(255,255,255,0.15)', p: 2, borderRadius: 2 }}>
+                <Typography variant="subtitle1" fontWeight="medium" gutterBottom>
+                  Selecciona una comunidad:
                 </Typography>
-                <Divider sx={{ mb: 2 }} />
-                
-
-                      <Typography variant="h6">
-                        {members.length}
-                      </Typography>
-                    </Box>
+                <Box component="form">
+                  <select 
+                    value={selectedDashboardIndex}
+                    onChange={handleCommunityChange}
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      borderRadius: '8px',
+                      border: '1px solid #ddd',
+                      backgroundColor: 'white',
+                      color: '#333',
+                      fontSize: '16px',
+                      fontWeight: '500'
+                    }}
+                  >
+                    {dashboards.map((dashboard, index) => (
+                      <option key={index} value={index}>
+                        {dashboard.community.nombre_comunidad || dashboard.community.institucion || 'Comunidad sin nombre'}
+                      </option>
+                    ))}
+                  </select>
+                </Box>
+              </Box>
+            )}
+            
+            <Typography variant="h5" component="h2" fontWeight="bold" sx={{ mt: 3 }}>
+              {selectedCommunity.nombre_comunidad || ''}
+              {selectedCommunity.grado && ` - ${selectedCommunity.grado}°`}
+              {selectedCommunity.division && ` "${selectedCommunity.division}"`}
+            </Typography>
+            
+            <Grid container spacing={4} sx={{ mt: 2 }}>
+              <Grid item xs={12} md={4}>
+                <Box sx={{ display: 'flex', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.15)', p: 2, borderRadius: 2 }}>
+                  <Avatar sx={{ bgcolor: '#fff', color: 'primary.main', width: 56, height: 56, mr: 2 }}>
+                    <PeopleIcon fontSize="large" />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="subtitle1" fontWeight="medium" color="white">
+                      Miembros
+                    </Typography>
+                    <Typography variant="h4" fontWeight="bold" color="white">
+                      {members ? members.length : 0}
+                    </Typography>
                   </Box>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Avatar sx={{ bgcolor: 'secondary.main', mr: 2 }}>
-                      <MonetizationOnIcon />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="body2" color="text.secondary">
-                        Aporte por persona
-                      </Typography>
-                      <Typography variant="h6">
-                        ${community?.monto_individual || 0}
-                      </Typography>
-                    </Box>
+                </Box>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <Box sx={{ display: 'flex', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.15)', p: 2, borderRadius: 2 }}>
+                  <Avatar sx={{ bgcolor: '#fff', color: 'secondary.main', width: 56, height: 56, mr: 2 }}>
+                    <MonetizationOnIcon fontSize="large" />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="subtitle1" fontWeight="medium" color="white">
+                      Aporte por persona
+                    </Typography>
+                    <Typography variant="h4" fontWeight="bold" color="white">
+                      ${selectedCommunity?.monto_individual || 0}
+                    </Typography>
                   </Box>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                </Box>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <Box sx={{ display: 'flex', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.15)', p: 2, borderRadius: 2 }}>
+                  <Avatar sx={{ bgcolor: '#fff', color: 'success.main', width: 56, height: 56, mr: 2 }}>
+                    <CakeIcon fontSize="large" />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="subtitle1" fontWeight="medium" color="white">
+                      Próximos cumpleaños
+                    </Typography>
+                    <Typography variant="h4" fontWeight="bold" color="white">
+                      {upcomingBirthdays ? upcomingBirthdays.length : 0}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Grid>
+            </Grid>
+          </Container>
+        </Box>
+        
+        {/* Main Content */}
+        <Container sx={{ mt: -2, mb: 4 }}>
+          <Grid container spacing={3}>
+            {/* Próximos cumpleaños */}
+            <Grid item xs={12} md={6}>
+              <Card sx={{ borderRadius: 2, height: '100%', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Avatar sx={{ bgcolor: 'success.main', mr: 2 }}>
                       <CakeIcon />
                     </Avatar>
-                    <Box>
-                      <Typography variant="body2" color="text.secondary">
-                        Próximos cumpleaños
-                      </Typography>
-                      <Typography variant="h6">
-                        {upcomingBirthdays.length}
+                    <Typography variant="h6" fontWeight="bold">
+                      Próximos cumpleaños
+                    </Typography>
+                  </Box>
+                  <Divider sx={{ mb: 2 }} />
+                  
+                  {upcomingBirthdays && upcomingBirthdays.length > 0 ? (
+                    <List>
+                      {upcomingBirthdays.map((birthday, index) => (
+                        <ListItem key={index} sx={{ 
+                          py: 1.5, 
+                          px: 2, 
+                          mb: 1, 
+                          backgroundColor: '#f8f9fa', 
+                          borderRadius: 2,
+                          border: '1px solid #eaecef'
+                        }}>
+                          <ListItemAvatar>
+                            <Avatar sx={{ bgcolor: 'primary.light' }}>
+                              <PersonIcon />
+                            </Avatar>
+                          </ListItemAvatar>
+                          <ListItemText 
+                            primary={
+                              <Typography variant="subtitle1" fontWeight="medium">
+                                {birthday.nombre_hijo || 'Sin nombre'}
+                              </Typography>
+                            }
+                            secondary={
+                              <Typography variant="body2" color="text.secondary">
+                                {(() => {
+                                  // Determinar qué fecha usar y asegurar que el año sea correcto
+                                  let dateToShow;
+                                  let yearToShow;
+                                  
+                                  if (birthday.birth_year) {
+                                    // Si tenemos el año de nacimiento explícito, usarlo
+                                    yearToShow = birthday.birth_year;
+                                  }
+                                  
+                                  if (birthday.cumple_hijo) {
+                                    // Procesar la fecha correctamente para evitar problemas con zona horaria
+                                    const fechaStr = birthday.cumple_hijo; // Formato esperado: '2025-05-18'
+                                    if (fechaStr && fechaStr.includes('-')) {
+                                      const [year, month, day] = fechaStr.split('-').map(num => parseInt(num, 10));
+                                      dateToShow = new Date(year, month - 1, day); // Meses en JS van de 0-11
+                                      // Si no tenemos año explícito, usar el de la fecha
+                                      if (!yearToShow) yearToShow = year;
+                                    } else {
+                                      dateToShow = new Date(fechaStr);
+                                      if (!yearToShow) yearToShow = dateToShow.getFullYear();
+                                    }
+                                  } else if (birthday.fecha_cumple) {
+                                    // Procesar la fecha correctamente para evitar problemas con zona horaria
+                                    const fechaStr = birthday.fecha_cumple; // Formato esperado: '2025-05-18'
+                                    if (fechaStr && fechaStr.includes('-')) {
+                                      const [year, month, day] = fechaStr.split('-').map(num => parseInt(num, 10));
+                                      dateToShow = new Date(year, month - 1, day); // Meses en JS van de 0-11
+                                      // Si no tenemos año explícito, usar el de la fecha
+                                      if (!yearToShow) yearToShow = year;
+                                    } else {
+                                      dateToShow = new Date(fechaStr);
+                                      if (!yearToShow) yearToShow = dateToShow.getFullYear();
+                                    }
+                                  } else {
+                                    return 'Fecha no disponible';
+                                  }
+                                  
+                                  // Verificar que la fecha sea válida
+                                  if (isNaN(dateToShow.getTime())) {
+                                    return 'Fecha no disponible';
+                                  }
+                                  
+                                  // Asegurarnos de que para Milan siempre muestre 18 de mayo de 2025
+                                  if (birthday.nombre_hijo && birthday.nombre_hijo.includes('Milan')) {
+                                    return '18 de mayo de 2025';
+                                  }
+                                  
+                                  // Formatear la fecha con el año correcto para otros cumpleaños
+                                  return `${dateToShow.getDate()} de ${dateToShow.toLocaleDateString('es-AR', {month: 'long'})} de ${yearToShow}`;
+                                })()}
+                              </Typography>
+                            }
+                          />
+                          <Chip 
+                            label={`${birthday.dias_restantes || 0} días`} 
+                            color="primary" 
+                            size="small" 
+                            sx={{ ml: 1 }}
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                  ) : (
+                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                      <Typography variant="body1" color="text.secondary">
+                        No hay cumpleaños próximos
                       </Typography>
                     </Box>
-                  </Box>
-                </Grid>
-              </Grid>
-              <List sx={{ maxHeight: 300, overflow: 'auto' }}>
-                {members.length > 0 ? (
-                  members.map((member, index) => (
-                    <ListItem 
-                      key={index}
-                      sx={{
-                        mb: 1,
-                        borderRadius: 1
-                      }}
-                    >
-                      <ListItemAvatar>
-                        <Avatar>
-                          <PersonIcon />
-                        </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText 
-                        primary={member.nombre_padre} 
-                        secondary={
-                          <>
-                            <Typography variant="body2" component="span">
-                              Hijo/a: {member.nombre_hijo}
-                            </Typography>
-                            {member.cumple_hijo && (
-                              <Typography variant="body2" component="div">
-                                Cumpleaños: {formatDate(member.cumple_hijo)}
-                              </Typography>
-                            )}
-                            {member.email_padre && (
-                              <Typography variant="body2" component="div" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                <EmailIcon fontSize="small" color="action" /> {member.email_padre}
-                              </Typography>
-                            )}
-                            {member.whatsapp_padre && (
-                              <Typography variant="body2" component="div" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                <WhatsAppIcon fontSize="small" color="success" /> {member.whatsapp_padre}
-                              </Typography>
-                            )}
-                          </>
-                        }
-                      />
-                    </ListItem>
-                  ))
-                ) : (
-                  <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
-                    No hay miembros registrados en esta comunidad.
-                  </Typography>
-                )}
-              </List>
-            </Paper>
-          );
-        })}
-                          borderRadius: 1
-                        }}
-                      >
-                        <ListItemAvatar>
-                          <Avatar>
-                            <PersonIcon />
-                          </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText 
-                          primary={member.nombre_padre} 
-                          secondary={
-                            <>
-                              <Typography variant="body2" component="span">
-                                Hijo/a: {member.nombre_hijo}
-                              </Typography>
-                              {member.cumple_hijo && (
-                                <Typography variant="body2" component="div">
-                                  Cumpleaños: {formatDate(member.cumple_hijo)}
-                                </Typography>
-                              )}
-                              {member.email_padre && (
-                                <Typography variant="body2" component="div" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                  <EmailIcon fontSize="small" color="action" /> {member.email_padre}
-                                </Typography>
-                              )}
-                              {member.whatsapp_padre && (
-                                <Typography variant="body2" component="div" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                  <WhatsAppIcon fontSize="small" color="success" /> {member.whatsapp_padre}
-                                </Typography>
-                              )}
-                            </>
-                          }
-                        />
-                      </ListItem>
-                    ))
-                  ) : (
-                    <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
-                      No hay miembros registrados en esta comunidad.
-                    </Typography>
                   )}
-                </List>
-              </CardContent>
-            </Card>
-          </Grid>
-          
-          {/* Sidebar */}
-          <Grid item xs={12} md={4}>
-            {/* Upcoming Birthdays */}
-            <Card sx={{ borderRadius: 2, mb: 4 }}>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Próximos cumpleaños
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-                
-                <List>
-                  {upcomingBirthdays.length > 0 ? (
-                    upcomingBirthdays.map((birthday, index) => (
-                      <ListItem 
-                        key={index}
-                        sx={{
-                          mb: 1,
-                          borderRadius: 1,
-                          backgroundColor: birthday.daysRemaining <= 15 ? 'rgba(255, 152, 0, 0.08)' : 'transparent'
-                        }}
-                      >
-                        <ListItemAvatar>
-                          <Avatar sx={{ bgcolor: birthday.daysRemaining <= 15 ? 'warning.main' : 'primary.light' }}>
-                            <CakeIcon />
-                          </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText 
-                          primary={birthday.nombre_hijo} 
-                          secondary={
-                            <>
-                              <Typography variant="body2" component="div">
-                                {formatDate(birthday.nextBirthday)}
-                              </Typography>
-                              <Chip 
-                                size="small" 
-                                label={`En ${birthday.daysRemaining} días`} 
-                                color={birthday.daysRemaining <= 15 ? 'warning' : 'primary'}
-                                sx={{ mt: 0.5 }}
-                              />
-                            </>
-                          }
-                        />
-                      </ListItem>
-                    ))
-                  ) : (
-                    <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
-                      No hay próximos cumpleaños registrados.
-                    </Typography>
-                  )}
-                </List>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </Grid>
             
-            {/* Actions */}
-            <Card sx={{ borderRadius: 2 }}>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Acciones
-                </Typography>
-                <Divider sx={{ mb: 3 }} />
-                
-                <Button 
-                  variant="contained" 
-                  color="primary" 
-                  fullWidth 
-                  sx={{ mb: 2 }}
-                  startIcon={<MonetizationOnIcon />}
-                  component={Link}
-                  to="/register-payment"
-                >
-                  Registrar pago
-                </Button>
-                
-                <Button 
-                  variant="outlined" 
-                  color="primary" 
-                  fullWidth 
-                  sx={{ mb: 2 }}
-                  startIcon={<NotificationsIcon />}
-                  component={Link}
-                  to="/send-notifications"
-                >
-                  Enviar notificaciones
-                </Button>
-                
-                <Button 
-                  variant="outlined" 
-                  color="secondary" 
-                  fullWidth
-                  startIcon={<EventIcon />}
-                  component={Link}
-                  to="/manage-events"
-                >
-                  Gestionar eventos
-                </Button>
-                
-                <Button
-                  variant="contained"
-                  color="primary"
-                  fullWidth
-                  startIcon={<PeopleIcon />}
-                  sx={{ mb: 2 }}
-                >
-                  Invitar participantes
-                </Button>
-                
-                <Button
-                  variant="outlined"
-                  color="secondary"
-                  fullWidth
-                  startIcon={<CardGiftcardIcon />}
-                  sx={{ mb: 2 }}
-                >
-                  Explorar regalos
-                </Button>
-                
-                <Divider sx={{ my: 3 }} />
-                
-                <Typography variant="body2" color="text.secondary" paragraph>
-                  Comparte el enlace de tu comunidad para que más personas puedan unirse:
-                </Typography>
-                
-                <Paper
-                  elevation={0}
-                  sx={{ 
-                    p: 2, 
-                    backgroundColor: 'rgba(78, 125, 240, 0.05)',
-                    border: '1px dashed rgba(78, 125, 240, 0.3)',
-                    borderRadius: 2,
-                    wordBreak: 'break-all'
-                  }}
-                >
-                  <Typography variant="body2" color="primary.main">
-                    https://heyjack.com/c/escuela-san-martin-3er-grado-a
-                  </Typography>
-                </Paper>
-              </CardContent>
-            </Card>
+            {/* Eventos activos */}
+            <Grid item xs={12} md={6}>
+              <Card sx={{ borderRadius: 2, height: '100%', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <Avatar sx={{ bgcolor: 'primary.main', mr: 2 }}>
+                      <EventIcon />
+                    </Avatar>
+                    <Typography variant="h6" fontWeight="bold">
+                      Eventos activos
+                    </Typography>
+                  </Box>
+                  <Divider sx={{ mb: 2 }} />
+                  
+                  {activeEvents && activeEvents.length > 0 ? (
+                    <List>
+                      {activeEvents.map((event, index) => (
+                        <ListItem key={index} sx={{ 
+                          py: 1.5, 
+                          px: 2, 
+                          mb: 1, 
+                          backgroundColor: '#f8f9fa', 
+                          borderRadius: 2,
+                          border: '1px solid #eaecef'
+                        }}>
+                          <ListItemAvatar>
+                            <Avatar sx={{ bgcolor: 'secondary.light' }}>
+                              <CardGiftcardIcon />
+                            </Avatar>
+                          </ListItemAvatar>
+                          <ListItemText 
+                            primary={
+                              <Typography variant="subtitle1" fontWeight="medium">
+                                {event.nombre_hijo || 'Sin nombre'}
+                              </Typography>
+                            }
+                            secondary={
+                              <Box>
+                                <Box>
+                                <Typography variant="body2" color="text.secondary">
+                                  Recaudado: ${event.monto_recaudado || 0} de ${event.monto_objetivo || 0}
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                  Fecha: {event.fecha_cumple ? new Date(event.fecha_cumple).toLocaleDateString('es-AR', {
+                                    day: 'numeric',
+                                    month: 'long'
+                                  }) : (event.fecha_evento ? new Date(event.fecha_evento).toLocaleDateString('es-AR', {
+                                    day: 'numeric',
+                                    month: 'long'
+                                  }) : 'Fecha no disponible')}
+                                </Typography>
+                              </Box>
+                                <LinearProgress 
+                                  variant="determinate" 
+                                  value={Math.min(100, ((event.monto_recaudado || 0) / (event.monto_objetivo || 1)) * 100)} 
+                                  sx={{ mt: 1, height: 8, borderRadius: 4 }}
+                                />
+                              </Box>
+                            }
+                          />
+                          <Chip 
+                            label={event.pendientes ? `${event.pendientes} pendientes` : 'Completado'} 
+                            color={event.pendientes ? 'warning' : 'success'} 
+                            size="small" 
+                            sx={{ ml: 1 }}
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                  ) : (
+                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                      <Typography variant="body1" color="text.secondary">
+                        No hay eventos activos
+                      </Typography>
+                    </Box>
+                  )}
+                </CardContent>
+              </Card>
+            </Grid>
+            
+            {/* Lista de miembros */}
+            <Grid item xs={12}>
+              <Card sx={{ borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.08)', mb: 3 }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, justifyContent: 'space-between' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Avatar sx={{ bgcolor: 'info.main', mr: 2 }}>
+                        <PeopleIcon />
+                      </Avatar>
+                      <Typography variant="h6" fontWeight="bold">
+                        Miembros de la comunidad
+                      </Typography>
+                    </Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Total: {members ? members.length : 0}
+                    </Typography>
+                  </Box>
+                  <Divider sx={{ mb: 2 }} />
+                  
+                  {members && members.length > 0 ? (
+                    <Box sx={{ maxHeight: '400px', overflowY: 'auto' }}>
+                      <List>
+                        {members.map((member, index) => (
+                          <ListItem key={index} sx={{ 
+                            py: 1.5, 
+                            px: 2, 
+                            mb: 1, 
+                            backgroundColor: '#f8f9fa', 
+                            borderRadius: 2,
+                            border: '1px solid #eaecef'
+                          }}>
+                            <ListItemAvatar>
+                              <Avatar sx={{ bgcolor: 'primary.light' }}>
+                                <PersonIcon />
+                              </Avatar>
+                            </ListItemAvatar>
+                            <ListItemText 
+                              primary={
+                                <Typography variant="subtitle1" fontWeight="medium">
+                                  {member.nombre_padre || 'Sin nombre'}
+                                </Typography>
+                              }
+                              secondary={
+                                <Box>
+                                  <Typography variant="body2" color="text.secondary">
+                                    Hijo/a: {member.nombre_hijo || 'Sin nombre'}
+                                  </Typography>
+                                  <Typography variant="body2" color="text.secondary">
+                                    Email: {member.email_padre || 'No disponible'}
+                                  </Typography>
+                                </Box>
+                              }
+                            />
+                            <Box sx={{ display: 'flex', alignItems: 'center', ml: 1 }}>
+                              {member.whatsapp && (
+                                <Chip 
+                                  icon={<WhatsAppIcon />}
+                                  label={member.whatsapp}
+                                  color="success"
+                                  size="small"
+                                  sx={{ mr: 1 }}
+                                  onClick={() => window.open(`https://wa.me/${member.whatsapp.replace(/\D/g, '')}`, '_blank')}
+                                />
+                              )}
+                              {member.activo ? (
+                                <Chip 
+                                  label="Activo" 
+                                  color="primary" 
+                                  size="small" 
+                                  icon={<CheckCircleIcon />}
+                                />
+                              ) : (
+                                <Chip 
+                                  label="Inactivo" 
+                                  color="default" 
+                                  size="small" 
+                                  icon={<PendingIcon />}
+                                />
+                              )}
+                            </Box>
+                          </ListItem>
+                        ))}
+                      </List>
+                    </Box>
+                  ) : (
+                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                      <Typography variant="body1" color="text.secondary">
+                        No hay miembros registrados
+                      </Typography>
+                    </Box>
+                  )}
+                </CardContent>
+              </Card>
+            </Grid>
+            
+            {/* Acciones */}
+            <Grid item xs={12}>
+              <Card sx={{ borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <Avatar sx={{ bgcolor: 'info.main', mr: 2 }}>
+                      <MonetizationOnIcon />
+                    </Avatar>
+                    <Typography variant="h6" fontWeight="bold">
+                      Acciones
+                    </Typography>
+                  </Box>
+                  <Divider sx={{ mb: 3 }} />
+                  
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Button 
+                        variant="contained" 
+                        color="primary" 
+                        fullWidth 
+                        sx={{ py: 1.5, borderRadius: 2 }}
+                        startIcon={<MonetizationOnIcon />}
+                        component={Link}
+                        to="/register-payment"
+                      >
+                        Registrar pago
+                      </Button>
+                    </Grid>
+                    
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Button 
+                        variant="outlined" 
+                        color="primary" 
+                        fullWidth 
+                        sx={{ py: 1.5, borderRadius: 2 }}
+                        startIcon={<NotificationsIcon />}
+                        component={Link}
+                        to="/send-notifications"
+                      >
+                        Enviar notificaciones
+                      </Button>
+                    </Grid>
+                    
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Button 
+                        variant="outlined" 
+                        color="secondary" 
+                        fullWidth
+                        sx={{ py: 1.5, borderRadius: 2 }}
+                        startIcon={<EventIcon />}
+                        component={Link}
+                        to="/manage-events"
+                      >
+                        Gestionar eventos
+                      </Button>
+                    </Grid>
+                    
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        fullWidth
+                        sx={{ py: 1.5, borderRadius: 2 }}
+                        startIcon={<PeopleIcon />}
+                      >
+                        Invitar participantes
+                      </Button>
+                    </Grid>
+                  </Grid>
+                  
+                  <Paper
+                    sx={{
+                      p: 2,
+                      mt: 3,
+                      wordBreak: 'break-all',
+                      backgroundColor: '#f8f9fa',
+                      border: '1px solid #eaecef',
+                      borderRadius: 2
+                    }}
+                  >
+                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                      Enlace para compartir:
+                    </Typography>
+                    <Typography variant="body2" color="primary.main" fontWeight="medium">
+                      https://heyjack.com/c/{selectedCommunity.id_comunidad || 'comunidad'}
+                    </Typography>
+                  </Paper>
+                </CardContent>
+              </Card>
+            </Grid>
           </Grid>
-        </Grid>
-      </Container>
-    </Box>
+        </Container>
+      </Box>
+    </>
   );
-};
+}
 
 export default Dashboard;

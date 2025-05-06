@@ -614,6 +614,7 @@ Enviado desde: +5491130963251`;
                   <FormControlLabel
                     control={
                       <Checkbox
+                        id="select-all-contributors"
                         checked={selectedContributors.length === contributors.length && contributors.length > 0}
                         indeterminate={selectedContributors.length > 0 && selectedContributors.length < contributors.length}
                         onChange={toggleAllContributors}
@@ -621,6 +622,7 @@ Enviado desde: +5491130963251`;
                       />
                     }
                     label="Seleccionar todos"
+                    labelPlacement="end"
                   />
                   
                   <List sx={{ maxHeight: '200px', overflow: 'auto', border: '1px solid #eee', borderRadius: '4px' }}>
@@ -632,12 +634,15 @@ Enviado desde: +5491130963251`;
                       contributors.map((contributor) => (
                         <ListItem key={contributor.id} dense button onClick={() => toggleContributor(contributor.id)}>
                           <Checkbox
+                            id={`contributor-checkbox-${contributor.id}`}
                             edge="start"
                             checked={selectedContributors.includes(contributor.id)}
                             tabIndex={-1}
                             disableRipple
+                            inputProps={{ 'aria-labelledby': `contributor-name-${contributor.id}` }}
                           />
                           <ListItemText 
+                            id={`contributor-name-${contributor.id}`}
                             primary={contributor.nombre_padre} 
                             secondary={
                               <Box component="span" sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0.5 }}>

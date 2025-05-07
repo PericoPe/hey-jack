@@ -10,8 +10,10 @@ import {
   TextField,
   Alert,
   CircularProgress,
-  Snackbar
+  Snackbar,
+  Divider
 } from '@mui/material';
+import SelectElement from '../components/SelectElement';
 import { useNavigate } from 'react-router-dom';
 
 // Importaciones de iconos
@@ -244,90 +246,110 @@ const AdminPanel = () => {
               </Box>
             </Box>
             
+            {/* Selector de Comunidad */}
+            <Box sx={{ p: 3, backgroundColor: '#f8f9fa' }}>
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+                Herramientas de Administración
+              </Typography>
+              
+              {/* Componente SelectElement para el panel de administración */}
+              <SelectElement 
+                label="Filtrar por comunidad"
+                options={[
+                  { value: 'todas', label: 'Todas las comunidades' },
+                  { value: 'marianista', label: 'Comunidad Marianista' },
+                  { value: 'san-jose', label: 'Comunidad San José' },
+                  { value: 'santa-maria', label: 'Comunidad Santa María' }
+                ]}
+                value="todas"
+                onChange={(value) => console.log('Filtro seleccionado:', value)}
+                showTitle={true}
+                title="Filtrar Datos por Comunidad"
+                sx={{ backgroundColor: 'white' }}
+              />
+              <Divider sx={{ my: 2 }} />
+            </Box>
+            
             {/* Pestañas */}
-            {authorized && (
-              <Box sx={{ width: '100%', bgcolor: 'background.paper', borderRadius: 2, overflow: 'hidden' }}>
-                <Tabs
-                  value={tabValue}
-                  onChange={handleTabChange}
-                  variant="scrollable"
-                  scrollButtons="auto"
-                  aria-label="admin tabs"
-                  sx={{
-                    borderBottom: 1,
-                    borderColor: 'divider',
-                    bgcolor: '#f5f9ff',
-                    '& .MuiTab-root': {
-                      py: 2,
-                      minHeight: 64
-                    }
-                  }}
-                >
-                  <Tab 
-                    icon={<DashboardIcon />} 
-                    label="Dashboard" 
-                    iconPosition="start"
-                    sx={{ flexDirection: 'row', alignItems: 'center' }}
-                  />
-                  <Tab 
-                    icon={<GroupWorkIcon />} 
-                    label="Comunidades" 
-                    iconPosition="start"
-                    sx={{ flexDirection: 'row', alignItems: 'center' }}
-                  />
-                  <Tab 
-                    icon={<PeopleIcon />} 
-                    label="Miembros" 
-                    iconPosition="start"
-                    sx={{ flexDirection: 'row', alignItems: 'center' }}
-                  />
-                  <Tab 
-                    icon={<EventIcon />} 
-                    label="Eventos" 
-                    iconPosition="start"
-                    sx={{ flexDirection: 'row', alignItems: 'center' }}
-                  />
-                  <Tab 
-                    icon={<EventAvailableIcon />} 
-                    label="Eventos Activos" 
-                    iconPosition="start"
-                    sx={{ flexDirection: 'row', alignItems: 'center' }}
-                  />
-                  <Tab 
-                    icon={<NotificationsIcon />} 
-                    label="Notificaciones" 
-                    iconPosition="start"
-                    sx={{ flexDirection: 'row', alignItems: 'center' }}
-                  />
-                </Tabs>
-                
-                <TabPanel value={tabValue} index={0}>
-                  <AdminDashboard setNotification={setNotification} />
-                </TabPanel>
-                
-                <TabPanel value={tabValue} index={1}>
-                  <AdminCommunities setNotification={setNotification} />
-                </TabPanel>
-                
-                <TabPanel value={tabValue} index={2}>
-                  <AdminMembers setNotification={setNotification} />
-                </TabPanel>
-                
-                <TabPanel value={tabValue} index={3}>
-                  <AdminEvents setNotification={setNotification} />
-                </TabPanel>
-                
-                <TabPanel value={tabValue} index={4}>
-                  <AdminActiveEvents setNotification={setNotification} />
-                </TabPanel>
-                
-                <TabPanel value={tabValue} index={5}>
-                  <AdminNotificationTools setNotification={setNotification} />
-                </TabPanel>
-                
-
-              </Box>
-            )}
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <Tabs 
+                value={tabValue} 
+                onChange={handleTabChange} 
+                variant="scrollable"
+                scrollButtons="auto"
+                aria-label="admin tabs"
+                sx={{
+                  borderBottom: 1,
+                  borderColor: 'divider',
+                  bgcolor: '#f5f9ff',
+                  '& .MuiTab-root': {
+                    py: 2,
+                    minHeight: 64
+                  }
+                }}
+              >
+                <Tab 
+                  icon={<DashboardIcon />} 
+                  label="Dashboard" 
+                  iconPosition="start"
+                  sx={{ flexDirection: 'row', alignItems: 'center' }}
+                />
+                <Tab 
+                  icon={<GroupWorkIcon />} 
+                  label="Comunidades" 
+                  iconPosition="start"
+                  sx={{ flexDirection: 'row', alignItems: 'center' }}
+                />
+                <Tab 
+                  icon={<PeopleIcon />} 
+                  label="Miembros" 
+                  iconPosition="start"
+                  sx={{ flexDirection: 'row', alignItems: 'center' }}
+                />
+                <Tab 
+                  icon={<EventIcon />} 
+                  label="Eventos" 
+                  iconPosition="start"
+                  sx={{ flexDirection: 'row', alignItems: 'center' }}
+                />
+                <Tab 
+                  icon={<EventAvailableIcon />} 
+                  label="Eventos Activos" 
+                  iconPosition="start"
+                  sx={{ flexDirection: 'row', alignItems: 'center' }}
+                />
+                <Tab 
+                  icon={<NotificationsIcon />} 
+                  label="Notificaciones" 
+                  iconPosition="start"
+                  sx={{ flexDirection: 'row', alignItems: 'center' }}
+                />
+              </Tabs>
+              
+              <TabPanel value={tabValue} index={0}>
+                <AdminDashboard setNotification={setNotification} />
+              </TabPanel>
+              
+              <TabPanel value={tabValue} index={1}>
+                <AdminCommunities setNotification={setNotification} />
+              </TabPanel>
+              
+              <TabPanel value={tabValue} index={2}>
+                <AdminMembers setNotification={setNotification} />
+              </TabPanel>
+              
+              <TabPanel value={tabValue} index={3}>
+                <AdminEvents setNotification={setNotification} />
+              </TabPanel>
+              
+              <TabPanel value={tabValue} index={4}>
+                <AdminActiveEvents setNotification={setNotification} />
+              </TabPanel>
+              
+              <TabPanel value={tabValue} index={5}>
+                <AdminNotificationTools setNotification={setNotification} />
+              </TabPanel>
+            </Box>
           </Box>
         </Paper>
       </Container>

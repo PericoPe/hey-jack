@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Container } from '@mui/material';
+
 import HeroSection from '../components/HeroSection';
 import ProblemSolution from '../components/ProblemSolution';
 import HowItWorks from '../components/HowItWorks';
@@ -11,6 +12,8 @@ import FinalCTA from '../components/FinalCTA';
 import Footer from '../components/Footer';
 
 const LandingPage = () => {
+
+
   return (
     <Box>
       <HeroSection />

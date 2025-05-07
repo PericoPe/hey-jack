@@ -37,7 +37,7 @@ const sendBirthdayNotification = async (options) => {
     });
 
     // Crear el asunto del email
-    const subject = `Hey Jack está recaudando para el cumpleaños de ${childName}`;
+    const subject = `Hey-Jack! está recaudando para el cumpleaños de ${childName}`;
 
     // Crear el cuerpo del email con un diseño más atractivo y profesional
     const html = `
@@ -46,14 +46,14 @@ const sendBirthdayNotification = async (options) => {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Hey Jack - Cumpleaños de ${childName}</title>
+        <title>Hey-Jack! - Cumpleaños de ${childName}</title>
       </head>
       <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5;">
         <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
           <!-- HEADER -->
           <tr>
             <td style="background: linear-gradient(135deg, #4e7df0, #8f57fb); padding: 30px 20px; text-align: center;">
-              <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">Hey Jack</h1>
+              <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">Hey-Jack!</h1>
               <p style="color: #ffffff; opacity: 0.9; margin: 5px 0 0; font-size: 16px;">Tu asistente para colectas de cumpleaños</p>
             </td>
           </tr>
@@ -133,7 +133,7 @@ const sendBirthdayNotification = async (options) => {
               </p>
               <p style="color: #333; font-size: 16px; line-height: 1.5; margin: 0;">
                 Saludos cordiales,<br>
-                <strong>Equipo Hey Jack</strong>
+                <strong>Equipo Hey-Jack!</strong>
               </p>
             </td>
           </tr>
@@ -142,7 +142,7 @@ const sendBirthdayNotification = async (options) => {
           <tr>
             <td style="background-color: #f5f5f5; padding: 20px; text-align: center; border-top: 1px solid #e0e0e0;">
               <p style="color: #999; font-size: 13px; margin: 0 0 5px;">
-                Este es un mensaje automático enviado por Hey Jack, tu asistente para colectas de cumpleaños.
+                Este es un mensaje automático enviado por Hey-Jack!, tu asistente para colectas de cumpleaños.
               </p>
               <p style="color: #999; font-size: 13px; margin: 0;">
                 Si tienes alguna pregunta, por favor contacta al organizador de la comunidad.
@@ -253,7 +253,7 @@ const sendBirthdayNotifications = async (event) => {
       // Enviar email
       const emailData = {
         to: contributor.email_padre,
-        subject: `Hey Jack está recaudando para el cumpleaños de ${event.nombre_hijo}`,
+        subject: `Hey-Jack! está recaudando para el cumpleaños de ${event.nombre_hijo}`,
         text: generateEmailText({
           parentName: contributor.nombre_padre,
           childName: event.nombre_hijo,

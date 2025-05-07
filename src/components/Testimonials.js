@@ -9,14 +9,14 @@ const Testimonials = () => {
       role: 'Madre de 2 hijos',
       avatar: 'MG',
       rating: 5,
-      text: 'Hey Jack me salvó de la locura de organizar la colecta para el regalo de la maestra. Todo fue tan fácil y rápido que no podía creerlo. ¡Definitivamente lo usaré para todas las colectas futuras!'
+      text: 'Hey-Jack! me salvó de la locura de organizar la colecta para el regalo de la maestra. Todo fue tan fácil y rápido que no podía creerlo. ¡Definitivamente lo usaré para todas las colectas futuras!'
     },
     {
       name: 'Carlos Rodríguez',
       role: 'Padre delegado de curso',
       avatar: 'CR',
       rating: 5,
-      text: 'Como delegado de curso, siempre me tocaba perseguir a los padres para las colectas. Con Hey Jack, todo el proceso fue automatizado y transparente. ¡Una maravilla!'
+      text: 'Como delegado de curso, siempre me tocaba perseguir a los padres para las colectas. Con Hey-Jack!, todo el proceso fue automatizado y transparente. ¡Una maravilla!'
     },
     {
       name: 'Ana Martínez',
@@ -40,7 +40,7 @@ const Testimonials = () => {
               mb: 2
             }}
           >
-            Lo que dicen los padres que ya usan Hey Jack
+            Lo que dicen los padres que ya usan Hey-Jack!
           </Typography>
           <Typography 
             variant="h6" 

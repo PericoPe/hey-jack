@@ -151,7 +151,7 @@ const Dashboard = () => {
           <Container>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
               <Typography variant="h4" component="h1" fontWeight="bold">
-                Hey Jack
+                Hey-Jack!
               </Typography>
               <Button 
                 component={Link} 

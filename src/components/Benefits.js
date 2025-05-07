@@ -32,7 +32,7 @@ const Benefits = () => {
     {
       icon: <TouchAppIcon fontSize="large" color="primary" />,
       title: 'Facilidad de Uso',
-      description: 'Interfaz conversacional intuitiva. Si sabes usar WhatsApp, ya sabes usar Hey Jack.'
+      description: 'Interfaz conversacional intuitiva. Si sabes usar WhatsApp, ya sabes usar Hey-Jack!.'
     },
     {
       icon: <CardGiftcardIcon fontSize="large" color="primary" />,
@@ -56,7 +56,7 @@ const Benefits = () => {
           >
             ¿Por qué elegir{' '}
             <Box component="span" className="text-gradient">
-              Hey Jack
+              Hey-Jack!
             </Box>
             {' '}para tu próxima colecta?
           </Typography>

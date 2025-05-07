@@ -20,7 +20,7 @@ const Footer = () => {
         <Grid container spacing={4}>
           <Grid item xs={12} md={4}>
             <Typography variant="h6" component="h3" gutterBottom fontWeight="bold">
-              Hey Jack
+              Hey-Jack!
             </Typography>
             <Typography variant="body2" sx={{ mb: 3, opacity: 0.8 }}>
               El asistente IA de WhatsApp que simplifica las colectas grupales para cumpleaños de hijos, profes y más.
@@ -161,7 +161,7 @@ const Footer = () => {
         
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'center', sm: 'flex-start' } }}>
           <Typography variant="body2" sx={{ opacity: 0.7, mb: { xs: 2, sm: 0 } }}>
-            © {new Date().getFullYear()} Hey Jack. Todos los derechos reservados.
+            © {new Date().getFullYear()} Hey-Jack!. Todos los derechos reservados.
           </Typography>
           <Box sx={{ display: 'flex', gap: 3 }}>
             <Link href="#" color="inherit" underline="hover" sx={{ opacity: 0.7, fontSize: '0.875rem' }}>

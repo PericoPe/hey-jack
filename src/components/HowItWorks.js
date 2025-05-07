@@ -24,7 +24,7 @@ const HowItWorks = () => {
     {
       number: 3,
       icon: <AutoAwesomeIcon fontSize="large" color="primary" />,
-      title: 'Hey Jack se Encarga del Resto',
+      title: 'Hey-Jack! se Encarga del Resto',
       description: 'Nuestro asistente automáticamente envía recordatorios, hace seguimiento de pagos y centraliza toda la información.',
       image: step3Image
     }
@@ -49,7 +49,7 @@ const HowItWorks = () => {
               mb: 2
             }}
           >
-            Así de Fácil es Organizar una Colecta con Hey Jack
+            Así de Fácil es Organizar una Colecta con Hey-Jack!
           </Typography>
           <Typography 
             variant="h6" 

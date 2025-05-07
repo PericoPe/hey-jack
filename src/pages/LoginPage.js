@@ -140,7 +140,7 @@ const LoginPage = () => {
         <Paper sx={{ p: 4, borderRadius: 2 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
             <Typography variant="h4" component="h1" gutterBottom fontWeight="bold" color="primary">
-              Hey Jack
+              Hey-Jack!
             </Typography>
             <Typography variant="body1" color="text.secondary" align="center">
               Ingresa tu email para acceder a tu comunidad

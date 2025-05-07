@@ -30,7 +30,7 @@ const ProblemSolution = () => {
     {
       icon: <CheckCircleOutlineIcon fontSize="large" color="primary" />,
       title: 'Comunicación organizada',
-      description: 'Hey Jack gestiona toda la comunicación sobre la colecta de forma automatizada.'
+      description: 'Hey-Jack! gestiona toda la comunicación sobre la colecta de forma automatizada.'
     },
     {
       icon: <AutoAwesomeIcon fontSize="large" color="primary" />,
@@ -111,7 +111,7 @@ const ProblemSolution = () => {
             >
               La solución con{' '}
               <Box component="span" className="text-gradient">
-                Hey Jack
+                Hey-Jack!
               </Box>
             </Typography>
             

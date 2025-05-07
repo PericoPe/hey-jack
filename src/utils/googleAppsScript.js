@@ -1,7 +1,7 @@
 /**
- * Hey Jack - Backend con Google Sheets
+ * Hey-Jack! - Backend con Google Sheets
  * 
- * Este script maneja la lógica de backend para la aplicación Hey Jack
+ * Este script maneja la lógica de backend para la aplicación Hey-Jack!
  * utilizando Google Sheets como base de datos temporal.
  */
 

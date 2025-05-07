@@ -35,14 +35,14 @@ const GiftSection = () => {
                 mb: 3
               }}
             >
-              Encuentra el Regalo Ideal Directamente con Hey Jack
+              Encuentra el Regalo Ideal Directamente con Hey-Jack!
             </Typography>
             
             <Typography 
               variant="body1" 
               sx={{ mb: 4 }}
             >
-              Una vez recaudado el dinero, Hey Jack te ayuda a encontrar el regalo perfecto gracias a nuestras integraciones con las principales tiendas online. Olvídate de buscar en decenas de sitios web, nosotros te mostramos las mejores opciones según el presupuesto y preferencias.
+              Una vez recaudado el dinero, Hey-Jack! te ayuda a encontrar el regalo perfecto gracias a nuestras integraciones con las principales tiendas online. Olvídate de buscar en decenas de sitios web, nosotros te mostramos las mejores opciones según el presupuesto y preferencias.
             </Typography>
             
             <Button 
@@ -114,7 +114,7 @@ const GiftSection = () => {
               <Box 
                 component="img"
                 src={giftImage}
-                alt="Encuentra el regalo perfecto con Hey Jack"
+                alt="Encuentra el regalo perfecto con Hey-Jack!"
                 sx={{
                   width: '100%',
                   maxWidth: 500,

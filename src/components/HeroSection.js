@@ -39,7 +39,7 @@ const HeroSection = () => {
                 gap: 1
               }}
             >
-              Hey Jack <AnimatedTitle phrases={['beta...', 'only friends']} />
+              Hey-Jack! <AnimatedTitle phrases={['beta...', 'only friends']} />
             </Typography>
           </Box>
           
@@ -77,7 +77,7 @@ const HeroSection = () => {
             >
               ¿Cansado/a de perseguir padres por la colecta de un cumple?{' '}
               <Box component="span" className="text-gradient">
-                Hey Jack se ocupa por vos.
+                Hey-Jack! se ocupa por vos.
               </Box>
             </Typography>
             

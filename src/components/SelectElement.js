@@ -48,12 +48,13 @@ const SelectElement = ({
         </Typography>
       )}
       <FormControl fullWidth variant={variant}>
-        <InputLabel id={`select-label-${label.replace(/\s+/g, '-').toLowerCase()}`}>
+        <InputLabel id={`select-label-${label.replace(/\s+/g, '-').toLowerCase()}`} htmlFor={`select-${label.replace(/\s+/g, '-').toLowerCase()}`}>
           {label}
         </InputLabel>
         <Select
           labelId={`select-label-${label.replace(/\s+/g, '-').toLowerCase()}`}
           id={`select-${label.replace(/\s+/g, '-').toLowerCase()}`}
+          inputProps={{ id: `select-${label.replace(/\s+/g, '-').toLowerCase()}` }}
           value={selectedValue}
           label={label}
           onChange={handleChange}

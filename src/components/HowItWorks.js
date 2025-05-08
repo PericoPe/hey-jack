@@ -1,32 +1,29 @@
 import React from 'react';
 import { Box, Container, Grid, Typography, Paper, Divider } from '@mui/material';
-import CreateIcon from '@mui/icons-material/Create';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import { step1Image, step2Image, step3Image } from '../assets/index';
+import MailOutlineIcon from '@mui/icons-material/MailOutline';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
+
 
 const HowItWorks = () => {
   const steps = [
     {
       number: 1,
-      icon: <CreateIcon fontSize="large" color="primary" />,
+      icon: <GroupAddIcon style={{ fontSize: 80, color: "#1976d2" }} />,
       title: 'Crear la Comunidad',
-      description: 'Crea tu colecta indicando el nombre, el agasajado y el monto objetivo que quieres alcanzar.',
-      image: step1Image
+      description: 'Crea tu colecta indicando el nombre, el agasajado y el monto objetivo que quieres alcanzar.'
     },
     {
       number: 2,
-      icon: <GroupAddIcon fontSize="large" color="primary" />,
+      icon: <MailOutlineIcon style={{ fontSize: 80, color: "#1976d2" }} />,
       title: 'Invitar a los Padres',
-      description: 'Comparte el enlace o código con los padres para que se unan a la colecta fácilmente.',
-      image: step2Image
+      description: 'Comparte el enlace o código con los padres para que se unan a la colecta fácilmente.'
     },
     {
       number: 3,
-      icon: <AutoAwesomeIcon fontSize="large" color="primary" />,
+      icon: <SmartToyIcon style={{ fontSize: 80, color: "#1976d2" }} />,
       title: 'Hey-Jack! se Encarga del Resto',
-      description: 'Nuestro asistente automáticamente envía recordatorios, hace seguimiento de pagos y centraliza toda la información.',
-      image: step3Image
+      description: 'Nuestro asistente automáticamente recauda dinero, automatiza próximos eventos y encuentra el mejor regalo.'
     }
   ];
 
@@ -81,45 +78,29 @@ const HowItWorks = () => {
                   }
                 }}
               >
-                <Box 
-                  sx={{ 
-                    position: 'relative',
-                    height: 200,
-                    backgroundColor: 'primary.light',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center'
-                  }}
-                >
-                  <Box
-                    component="img"
-                    src={step.image}
-                    alt={`Paso ${step.number}: ${step.title}`}
-                    sx={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover'
-                    }}
-                  />
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      top: 16,
-                      left: 16,
-                      width: 40,
-                      height: 40,
-                      borderRadius: '50%',
-                      backgroundColor: 'primary.main',
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      color: 'white',
-                      fontWeight: 'bold',
-                      fontSize: '1.2rem',
-                      boxShadow: '0 4px 8px rgba(78, 125, 240, 0.3)'
-                    }}
-                  >
-                    {step.number}
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pt: 4 }}>
+                  <Box sx={{ position: 'relative', mb: 2 }}>
+                    {step.icon}
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: 40,
+                        height: 40,
+                        borderRadius: '50%',
+                        backgroundColor: 'primary.main',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        color: 'white',
+                        fontWeight: 'bold',
+                        fontSize: '1.2rem',
+                        boxShadow: '0 4px 8px rgba(78, 125, 240, 0.3)'
+                      }}
+                    >
+                      {step.number}
+                    </Box>
                   </Box>
                 </Box>
 

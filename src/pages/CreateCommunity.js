@@ -209,6 +209,7 @@ const CreateCommunity = () => {
                   onChange={handleChange}
                   placeholder="Ej: Escuela San Martín"
                   variant="outlined"
+                  autoComplete="organization"
                 />
               </Grid>
               
@@ -221,6 +222,7 @@ const CreateCommunity = () => {
                   value={formData.gradeLevel}
                   onChange={handleChange}
                   select
+                  autoComplete="off"
                 >
                   <MenuItem value="Maternal">Maternal</MenuItem>
                   <MenuItem value="Sala 3">Sala 3</MenuItem>
@@ -246,6 +248,7 @@ const CreateCommunity = () => {
                   onChange={handleChange}
                   placeholder="Ej: Rojo, Verde, A, B, etc."
                   variant="outlined"
+                  autoComplete="off"
                 />
               </Grid>
               
@@ -262,6 +265,7 @@ const CreateCommunity = () => {
                     startAdornment: <InputAdornment position="start">$</InputAdornment>,
                   }}
                   variant="outlined"
+                  autoComplete="off"
                 />
               </Grid>
             </Grid>
@@ -287,6 +291,7 @@ const CreateCommunity = () => {
                   value={formData.childName}
                   onChange={handleChange}
                   variant="outlined"
+                  autoComplete="name"
                 />
               </Grid>
               
@@ -303,6 +308,7 @@ const CreateCommunity = () => {
                     shrink: true,
                   }}
                   variant="outlined"
+                  autoComplete="bday"
                 />
               </Grid>
               
@@ -315,6 +321,7 @@ const CreateCommunity = () => {
                   value={formData.parentName}
                   onChange={handleChange}
                   variant="outlined"
+                  autoComplete="name"
                 />
               </Grid>
               
@@ -328,6 +335,7 @@ const CreateCommunity = () => {
                   onChange={handleChange}
                   placeholder="Ej: +5491123456789"
                   variant="outlined"
+                  autoComplete="tel"
                 />
               </Grid>
               
@@ -341,6 +349,7 @@ const CreateCommunity = () => {
                   value={formData.email}
                   onChange={handleChange}
                   variant="outlined"
+                  autoComplete="email"
                 />
               </Grid>
               
@@ -353,6 +362,7 @@ const CreateCommunity = () => {
                   value={formData.mercadoPagoAlias}
                   onChange={handleChange}
                   variant="outlined"
+                  autoComplete="off"
                 />
               </Grid>
             </Grid>

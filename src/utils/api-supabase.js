@@ -5,6 +5,8 @@ import supabase from './supabaseClient';
  * @param {Object} communityData - Datos de la comunidad
  * @returns {Promise} - Promesa con la respuesta
  */
+import { createCommunity as supabaseCreateCommunity } from './supabaseClient';
+
 export const createCommunity = async (communityData) => {
   try {
     // Generar ID único para la comunidad si no existe
@@ -28,40 +30,41 @@ export const createCommunity = async (communityData) => {
       creador_nombre: communityData.parentName,
       creador_email: communityData.email,
       creador_whatsapp: communityData.whatsapp,
-      monto_individual: communityData.contributionAmount
+      estado: 'activa',
+      monto_individual: communityData.contributionAmount,
+      fecha_creacion: new Date().toISOString(),
+      slug: '',
+      miembros_reales: 1
     });
-    
-    // Crear comunidad y esperar a que se confirme la creación
-    const { data: community, error: communityError } = await supabase
-      .from('comunidades')
-      .insert([
-        {
-          id_comunidad: id_comunidad,
-          nombre_comunidad: nombreComunidad,
-          institucion: communityData.institution,
-          grado: communityData.gradeLevel,
-          division: communityData.division,
-          creador_nombre: communityData.parentName,
-          creador_email: communityData.email,
-          creador_whatsapp: communityData.whatsapp,
-          miembros: 1,
-          estado: 'activa',
-          monto_individual: communityData.contributionAmount
-        }
-      ])
-      .select()
-      .single(); // Asegura que obtienes el objeto creado
 
-    if (communityError || !community) {
-      console.error('Error al crear comunidad:', communityError);
-      throw communityError || new Error('No se pudo crear la comunidad');
-    }
+    // Crear la comunidad en Supabase usando el mapeo automático
+    const { result, error: comunidadError } = await supabaseCreateCommunity({
+      id_comunidad,
+      nombre_comunidad: nombreComunidad,
+      institucion: communityData.institution,
+      grado: communityData.gradeLevel,
+      division: communityData.division,
+      creador_nombre: communityData.parentName,
+      creador_email: communityData.email,
+      creador_whatsapp: communityData.whatsapp,
+      estado: 'activa',
+      monto_individual: communityData.contributionAmount,
+      fecha_creacion: new Date().toISOString(),
+      slug: '',
+      miembros_reales: 1
+    });
 
-    // Usa el id_comunidad real retornado por Supabase
-    const idComunidadReal = community.id_comunidad;
+    if (comunidadError) throw comunidadError;
+    const comunidadReal = result && result.length > 0 ? result[0] : null;
+    const idComunidadReal = comunidadReal?.id_comunidad || id_comunidad;
+
+    // DEBUG: Verificar id comunidad antes de crear miembro
+    console.log('DEBUG idComunidadReal:', idComunidadReal, 'comunidadReal:', comunidadReal);
+    // Esperar 500ms para asegurar que la comunidad esté disponible (evitar race condition)
+    await new Promise(res => setTimeout(res, 500));
 
     // Insertar al creador como primer miembro SOLO si la comunidad fue creada
-    console.log('Intentando registrar miembro creador con datos:', {
+    const miembroObj = {
       id_comunidad: idComunidadReal,
       id_nombre_padre: communityData.parentName,
       nombre_padre: communityData.parentName,
@@ -72,24 +75,12 @@ export const createCommunity = async (communityData) => {
       cumple_hijo: communityData.childBirthdate,
       perfil: 'creador',
       monto_individual: communityData.contributionAmount
-    });
+    };
+    console.log('Insertando miembro:', miembroObj);
 
     const { data: member, error: memberError } = await supabase
       .from('miembros')
-      .insert([
-        {
-          id_comunidad: idComunidadReal,
-          id_nombre_padre: communityData.parentName,
-          nombre_padre: communityData.parentName,
-          whatsapp_padre: communityData.whatsapp,
-          email_padre: communityData.email,
-          alias_mp: communityData.mercadoPagoAlias,
-          nombre_hijo: communityData.childName,
-          cumple_hijo: communityData.childBirthdate,
-          perfil: 'creador',
-          monto_individual: communityData.contributionAmount
-        }
-      ])
+      .insert([miembroObj])
       .select();
 
     if (memberError) throw memberError;
@@ -242,7 +233,12 @@ export const getCommunityDetails = async (communityId) => {
       creatorName: community.creador_nombre,
       creatorEmail: community.creador_email,
       creatorWhatsapp: community.creador_whatsapp,
-      memberCount: community.miembros,
+      // Obtener el número de miembros desde la tabla 'miembros'
+      memberCount: (await supabase
+        .from('miembros')
+        .select('id', { count: 'exact', head: true })
+        .eq('id_comunidad', community.id_comunidad)
+      ).count,
       status: community.estado,
       contributionAmount: community.monto_individual
     };
